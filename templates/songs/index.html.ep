@@ -1,0 +1,35 @@
+% include layout 'default';
+<div class="card card-default">
+  <div class="card-header text-center">
+    <h2>Songs</h2>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+        <table class="table table-sm table-striped">
+            <thead>
+                <tr>
+                    <th>Song</th>
+                    <th>Artist</th>
+                    <th>Album</th>
+                    <th>Duration (seconds)<th>
+                </tr>
+            </thead>
+            <tbody>
+              <% for my $song (@$songs) { %>
+              <tr>
+                <td>
+                  <a href="<%= url_for('playlists_add_to_current')->query(path => ($song->{info}->{partialPath} || 'none')) %>"><%= $song->{name} %></a>
+                </td>
+                <td><%= $song->{info}->{artist} %></td>
+                <td><%= $song->{info}->{album} %></td>
+                <td><%= $song->{info}->{time} %> </td>
+              </tr>
+              <% } %>
+
+            </tbody>
+        </table>
+    </div>
+
+  </div>
+  <div class="card-footer"></div>
+</div>

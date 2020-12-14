@@ -1,0 +1,28 @@
+% include layout => 'default';
+<div class="card card-default">
+  <div class="card-header text-center">
+    <h1>Player</h1>
+  </div>
+  <div class="card-body">
+    <figure>
+      <figcaption>Current:
+        <span id="current_song"></span>
+      </figcaption>
+      <audio id="audioPlayer" controls preload>
+        Your browser does not support the AUDIO element
+      </audio>
+    </figure>
+  </div>
+  <div class="card-footer"></div>
+</div>
+
+<script>
+  const playList = <%= $playlist %>;
+  const player = document.getElementById("audioPlayer");
+  player.setAttribute("src", playList[0]);
+  player.addEventListener("ended", (e) => {
+      console.log("Ended");
+      player.setAttribute("src", playList[1]);
+      player.play();
+  });
+</script>
