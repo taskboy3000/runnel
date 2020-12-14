@@ -1,4 +1,5 @@
-% include layout => 'default';
+% include layout 'default';
+% use JSON;
 <div class="card card-default">
   <div class="card-header text-center">
     <h1>Player</h1>
@@ -17,9 +18,11 @@
 </div>
 
 <script>
-  const playList = <%= $playlist %>;
+  const playList = <%== JSON::to_json($playlist) %>;
   const player = document.getElementById("audioPlayer");
-  player.setAttribute("src", playList[0]);
+  if (playList.length > 0) {
+      player.setAttribute("src", playList[0].info.partialPath);
+  }
   player.addEventListener("ended", (e) => {
       console.log("Ended");
       player.setAttribute("src", playList[1]);
