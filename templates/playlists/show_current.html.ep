@@ -1,13 +1,10 @@
 % include layout 'default';
 
 <div class="card card-default">
-  <div class="card-header text-center m-0 p-0">
-    <h2 class="m-0 p-0">Current Playlist</h2>
-  </div>
   <div class="card-body m-0 p-0">
     <%= include template => 'players/index', format => 'html', handler => 'ep' %>
     
-    <div class="table-responsive">
+    <div class="table-responsive" style="max-height: 600px;overflow-y:auto">
         <table class="table table-sm table-striped">
             <thead>
                 <tr>

@@ -18,3 +18,8 @@ html {
 .controller.playlists .playlist-song:hover {
     cursor: pointer;
 }
+
+
+header .nav-link.active {
+    text-decoration: underline;
+}

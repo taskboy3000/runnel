@@ -48,6 +48,7 @@ sub find_songs {
     $self->songs  ( [ sort { $a->{name} cmp $b->{name} } @{ $self->songs } ]);
 }
 
+
 sub getMP3Info {
     my ($self, $filename) = @_;
 
@@ -107,14 +108,18 @@ sub getMP3Info {
 }
 
 sub find_by_path ($self, $path) {
-    return if !defined $path;
-    for my $song (@{$self->songs}) {
-        if ($song->{info}->{partialPath} eq $path) {
-            return $song;
-        }
-    }
-    return;
+    return $self->get_songs(partialPath => $path)->[0];
 }
 
+sub get_songs ($self, $type, $criterion) {
+    my @found;  
+    for my $song (@{ $self->songs }) {
+        if ($song->{info}->{$type} eq $criterion) {
+            push @found, $song;
+        }
+    }
+
+    return \@found;
+}
 
 1;

@@ -1,8 +1,5 @@
 % include layout 'default';
 <div class="card card-default">
-  <div class="card-header text-center m-0 p-0">
-    <h2>Songs</h2>
-  </div>
   <div class="card-body m-0 p-0">
     <div class="table-responsive">
         <table class="table table-sm table-striped sortable">
@@ -19,11 +16,37 @@
               <% for my $song (@$songs) { %>
               <tr>
                 <td class="song">
-                  <a href="<%= url_for('playlists_add_to_current')->query(path => ($song->{info}->{partialPath} || 'none')) %>"><%= $song->{name} %></a>
+                  <a href="<%= url_for('playlists_add_to_current')->query(path => $song->{info}->{partialPath}) %>">
+                    <%= $song->{name} %>
+                  </a>
                 </td>
-                <td><%= $song->{info}->{artist} %></td>
-                <td><%= $song->{info}->{album} %></td>
-                <td><%= $song->{info}->{genre} || '-' %> </td>
+                <td class="artist">
+                  <% if ($song->{info}->{artist}) { %>
+                  <a href="<%= url_for('playlists_add_artist')->query('name', $song->{info}->{artist}) %>">
+                    <%= $song->{info}->{artist} %>
+                  </a>
+                  <% } else { %>
+                  -
+                  <% } %>
+                </td>
+                <td class="album">
+                  <% if ($song->{info}->{album}) { %>
+                  <a href="<%= url_for('playlists_add_album')->query('name', $song->{info}->{album}) %>">
+                    <%= $song->{info}->{album} %>
+                  </a>
+                  <% } else { %>
+                  -
+                  <% } %>
+                </td>
+                <td class="genre">
+                  <% if ($song->{info}->{genre}) { %>
+                  <a href="<%= url_for('playlists_add_genre')->query('name', $song->{info}->{genre}) %>">
+                    <%= $song->{info}->{genre} %>
+                  </a>
+                  <% } else { %>
+                  -
+                  <% } %>
+                </td>
                 <td><%= $song->{info}->{time_pretty} %> </td>
               </tr>
               <% } %>

@@ -44,14 +44,62 @@ sub remove_from_current ($self) {
 
 sub clear_current ($self) {
     $self->app->playlist = [];
-    # @todo: respond_to
+
     $self->respond_to(
                       'json' => sub { $self->render(json => {success => 1} ) },
                                         'html' => sub {
                                           $self->redirect_to("playlist_show_current");
                                         }
                      );
-    
+
+}
+
+
+sub add_artist ($self) {
+    my $name = $self->param("name");
+    my $songs = $self->app->catalog->get_songs(artist => $name);
+    if (@$songs) {
+        push @{ $self->app->playlist }, @$songs;
+    }
+
+    $self->respond_to(
+                      'json' => sub { $self->render(json => {success => 1} ) },
+                      'html' => sub {
+                        $self->redirect_to("playlists_show_current");
+                      }
+                     );
+}
+
+
+sub add_album ($self) {
+    my $name = $self->param("name");
+    my $songs = $self->app->catalog->get_songs(album => $name);
+    if (@$songs) {
+        push @{ $self->app->playlist }, @$songs;
+    }
+
+    $self->respond_to(
+                      'json' => sub { $self->render(json => {success => 1} ) },
+                      'html' => sub {
+                        $self->redirect_to("playlists_show_current");
+                      }
+                     );
+}
+
+
+sub add_genre ($self) {
+    my $name = $self->param("name");
+    my $songs = $self->app->catalog->get_songs(genre => $name);
+    if (@$songs) {
+        push @{ $self->app->playlist }, @$songs;
+    }
+
+    $self->respond_to(
+                      'json' => sub { $self->render(json => {success => 1} ) },
+                      'html' => sub {
+                        $self->redirect_to("playlists_show_current");
+                      }
+                     );
 }
 
 1;
