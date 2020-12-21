@@ -95,12 +95,14 @@ sub getMP3Info {
     $info{mode} = $mp3Info->{VBR} ? 'vbr' : 'cbr';
     $info{size} = $mp3Info->{SIZE};
     $info{time} = int($mp3Info->{SECS});
-    
+
+    # convert to hh::mm::ss
+    my $minutes = int($info{time}/60);
+    my $seconds = int($info{time} % 60);
+    $info{time_pretty} = sprintf("%d:%02d", $minutes, $seconds);
+
     $info{channels} = $mp3Info->{STEREO} ? 2 : 1;
 
-    # if (!$info{artist}) {     
-    #   print JSON::to_json(\%info, {canonical=>1, pretty=>1});
-    # }
     return \%info;
 }
 

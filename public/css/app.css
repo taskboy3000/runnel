@@ -7,10 +7,14 @@ html {
     font-family: san-serif;
 }
 
-.controller.songs td:hover {
+.controller.songs td.song:hover {
     background-color: #eecccc;
 }
 
 .controller.songs td a {
     display: block;
+}
+
+.controller.playlists .playlist-song:hover {
+    cursor: pointer;
 }

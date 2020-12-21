@@ -1,0 +1,27 @@
+% include layout 'default';
+<div class="jumbotron">
+  <h2>Catalog</h2>
+</div>
+
+<div class="player">
+  <figure>
+    <figcaption>Listen to the T-Rex:</figcaption>
+    <audio id="audioPlayer" controls preload>
+            Your browser does not support the
+            <code>audio</code> element.
+    </audio>
+  </figure>
+</div>
+
+<script>
+  const playList = ["/mp3/arthurs_theme_japanese_cover.mp3",
+		    "/mp3/butch_clancy_foster_the_people_pumped_up_kicks.mp3",
+		   ];
+  const player = document.getElementById("audioPlayer");
+  player.setAttribute("src", playList[0]);
+  player.addEventListener("ended", (e) => {
+      console.log("Ended");
+      player.setAttribute("src", playList[1]);
+      player.play();
+  });
+</script>

@@ -1,10 +1,12 @@
 % include layout 'default';
 
 <div class="card card-default">
-  <div class="card-header text-center">
-    <h2>Playlist</h2>
+  <div class="card-header text-center m-0 p-0">
+    <h2 class="m-0 p-0">Current Playlist</h2>
   </div>
-  <div class="card-body">
+  <div class="card-body m-0 p-0">
+    <%= include template => 'players/index', format => 'html', handler => 'ep' %>
+    
     <div class="table-responsive">
         <table class="table table-sm table-striped">
             <thead>
@@ -12,23 +14,30 @@
                     <th>Song</th>
                     <th>Artist</th>
                     <th>Album</th>
-                    <th>Duration (seconds)<th>
+                    <th>Duration (seconds)</th>
+                    <th>&nbsp;</th>
                 </tr>
             </thead>
-            <tbody>
-              <% for my $song (@$playlist) { %>
+            <tbody class="small">
+              <% for (my $idx=0; $idx < @$playlist; $idx++) { %>
+              <% my $song = $playlist->[$idx]; %>
               <tr>
-                <td><%= $song->{name} %></td>
+                <td class="playlist-song" data-idx="<%= $idx %>"><%= $song->{name} %></td>
                 <td><%= $song->{info}->{artist} %></td>
                 <td><%= $song->{info}->{album} %></td>
-                <td><%= $song->{info}->{time} %> </td>
+                <td><%= $song->{info}->{time_pretty} %> </td>
+                <td>
+                  <a href="<%= url_for("playlists_remove_from_current")->query("path", $song->{info}->{partialPath}) %>" class="btn btn-sm btn-danger">
+                    <i class="fas fa-trash-alt"></i>
+                  </a>
+                </td>
               </tr>
               <% } %>
-
             </tbody>
         </table>
     </div>
 
+    
   </div>
-  <div class="card-footer"></div>
+  <div class="card-footer">&nbsp;</div>
 </div>

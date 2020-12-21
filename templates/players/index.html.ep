@@ -1,31 +1,145 @@
-% include layout 'default';
-% use JSON;
-<div class="card card-default">
-  <div class="card-header text-center">
-    <h1>Player</h1>
+% use Mojo::JSON ('encode_json');
+<figure>
+  <figcaption class="text-center bg-dark text-light text-nowrap p-1" style="overflow:hidden">
+    <div id="current_song"></div>
+    <div class="progress">
+      <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="width:0"></div>
+    </div>
+  </figcaption>
+  
+  <div class="btn-group player-controls d-table mx-auto" style="max-width:350px;overflow:hidden">
+    <button id="player-control-prev" class="btn-secondary">
+      <i class="fas fa-step-backward fa-fw fa-2x"></i>
+    </button>
+    <button id="player-control-play" class="btn-secondary">
+      <i class="fas fa-play fa-fw fa-2x"></i>
+    </button>
+    <button id="player-control-next" class="btn-secondary">
+      <i class="fas fa-play fa-step-forward fa-2x"></i>      
+    </button>
+    <button id="player-control-stop" class="btn-secondary">
+      <i class="fas fa-play fa-stop fa-2x"></i>
+    </button>
   </div>
-  <div class="card-body">
-    <figure>
-      <figcaption>Current:
-        <span id="current_song"></span>
-      </figcaption>
-      <audio id="audioPlayer" controls preload>
-        Your browser does not support the AUDIO element
-      </audio>
-    </figure>
+  <div class="mx-auto" style="width:60px">
+    <input id="player-control-loop" type="checkbox" name="loop" value="1"> Loop
   </div>
-  <div class="card-footer"></div>
-</div>
+  
+  <audio id="audioPlayer" preload>
+    Your browser does not support the AUDIO element
+  </audio>
+  
+</figure>
 
 <script>
-  const playList = <%== JSON::to_json($playlist) %>;
+  const playList = <%== encode_json($playlist) %>;
+
   const player = document.getElementById("audioPlayer");
-  if (playList.length > 0) {
-      player.setAttribute("src", playList[0].info.partialPath);
+  const currentSong = document.getElementById("current_song");
+  const loopControl = document.getElementById("player-control-loop");
+  const progressBar = document.querySelector(".progress");
+  
+  let gCurrentPlaylistIdx = 0;
+  let gDate = new Date();
+  let gLastPBUpdate = gDate.getTime();
+  
+  function setCurrentSong (song) {
+      if (song) {
+          console.info("Changing to " + song.info.title);
+          player.setAttribute("src", song.info.partialPath);
+          currentSong.innerHTML = song.info.title;          
+      }
   }
-  player.addEventListener("ended", (e) => {
-      console.log("Ended");
-      player.setAttribute("src", playList[1]);
-      player.play();
+
+  function initializeSongClick (node) {
+      if (!node) {
+          return;
+      }
+
+      let idx = node.getAttribute("data-idx");
+      if (idx != undefined) {
+          let song = playList[idx];
+          if (song) {
+              node.addEventListener('click', (event) => {
+                  player.pause();
+                  gCurrentPlaylistIdx = idx;
+                  setCurrentSong(song);
+                  player.play();
+              });
+          }
+      }
+  }
+
+  function initializePlayer (player) {
+      if (playList.length > 0) {
+          setCurrentSong(playList[0]);
+      }
+
+      player.addEventListener("ended", (e) => {
+          if (gCurrentPlaylistIdx + 1 > playList.length) {
+              if (loopControl.checked) {
+                  gCurrentPlaylistIdx = 0;
+              } else {
+                  console.info("Reached the end of the play list");
+                  return;
+              }
+          } else {
+              gCurrentPlaylistIdx += 1;
+          }
+
+          player.setAttribute("src", playList[gCurrentPlaylistIdx]);
+          player.play();
+      });
+
+      player.addEventListener("timeupdate", (e) => {          
+          let target = e.target;
+          let D = new Date();
+          let now = D.getTime();
+          if (now - gLastPBUpdate < 250) {
+              return;
+          }
+          gLastPBUpdate = now;
+          
+          progressBar.setAttribute("aria-valuenow", target.currentTime);
+          progressBar.setAttribute("aria-valuemax", target.duration);
+          let width = Math.floor( (target.currentTime / target.duration) * 100);
+          progressBar.querySelector(".progress-bar").style.width = width + "%";
+      });
+      
+      const BtnStop = document.getElementById("player-control-stop");
+      BtnStop.addEventListener('click', (event) => {
+          player.pause();
+      });
+      
+      const BtnPlay = document.getElementById("player-control-play");
+      BtnPlay.addEventListener('click', (event) => {
+          player.play();
+      });
+
+      const BtnPrev = document.getElementById("player-control-prev");
+      BtnPrev.addEventListener('click', (event) => {
+          player.pause();
+          if (gCurrentPlaylistIdx - 1 >= 0) {
+              gCurrentPlaylistIdx = gCurrentPlaylistIdx - 1;
+              setCurrentSong(playList[gCurrentPlaylistIdx]);
+          }
+      });
+
+      const BtnNext = document.getElementById("player-control-next");
+      BtnNext.addEventListener('click', (event) => {
+          player.pause();
+          if (gCurrentPlaylistIdx + 1 < playList.length) {
+              gCurrentPlaylistIdx = gCurrentPlaylistIdx + 1;
+              setCurrentSong(playList[gCurrentPlaylistIdx]);
+          }
+      });
+            
+  }
+
+  initializePlayer(player);
+  document.addEventListener('DOMContentLoaded', (event) => {
+      for (let td of document.querySelectorAll("td.playlist-song")) {
+          initializeSongClick(td);
+      }
   });
 </script>

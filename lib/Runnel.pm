@@ -29,7 +29,7 @@ sub startup ($self) {
 
   $r->get('/playlists/current')->to('playlists#show_current')->name('playlists_show_current');
   $r->get('/playlists/current/add')->to('playlists#add_to_current')->name('playlists_add_to_current');
-  $r->get('/playlists/current/remove')->to('playlists#remove_from_current')->name('playlists_from_from_current');
+  $r->get('/playlists/current/remove')->to('playlists#remove_from_current')->name('playlists_remove_from_current');
   $r->get('/playlists/current/clear')->to('playlists#clear_current')->name('playlists_clear_current');
 
   $r->get("/player")->to('players#index')->name('players_index');
