@@ -86,8 +86,8 @@
           } else {
               gCurrentPlaylistIdx += 1;
           }
-
-          player.setAttribute("src", playList[gCurrentPlaylistIdx]);
+          
+          setCurrentSong(playList[gCurrentPlaylistIdx]);
           player.play();
       });
 
