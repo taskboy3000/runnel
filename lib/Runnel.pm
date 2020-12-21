@@ -33,7 +33,7 @@ sub startup ($self) {
   $r->get('/playlists/current/add/album')->to('playlists#add_album')->name('playlists_add_album');
   $r->get('/playlists/current/add/genre')->to('playlists#add_genre')->name('playlists_add_genre');
   $r->get('/playlists/current/remove')->to('playlists#remove_from_current')->name('playlists_remove_from_current');
-  $r->get('/playlists/current/clear')->to('playlists#clear_current')->name('playlists_clear_current');
+  $r->post('/playlists/current/clear')->to('playlists#clear_current')->name('playlists_clear_current');
 
   
   $r->get("/player")->to('players#index')->name('players_index');

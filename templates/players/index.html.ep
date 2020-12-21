@@ -43,11 +43,38 @@
   let gDate = new Date();
   let gLastPBUpdate = gDate.getTime();
   
-  function setCurrentSong (song) {
-      if (song) {
-          console.info("Changing to " + song.info.title);
-          player.setAttribute("src", song.info.partialPath);
-          currentSong.innerHTML = song.info.title;          
+  function setCurrentSong (trgIdx) {
+      if (trgIdx < 0) {
+          console.error("Attempt to use a negative index for currentSong");
+          return;
+      } else if (trgIdx > (playList.length - 1)) {
+          console.error("Attempt to see idx past length of playlist: ", trgIdx);
+          return;          
+      }
+
+      gCurrentPlaylistIdx = trgIdx;
+      let song = playList[ gCurrentPlaylistIdx ];
+      if (!song) {
+          console.error("Cannot find a song in playlist at idx ", trgIdx);
+          return;
+      }
+      
+      console.info("Setting current song to idx ", trgIdx, " which is ", song["info"]["title"]);
+
+      player.setAttribute("src", song.info.partialPath);
+      currentSong.innerHTML = song.info.title;
+
+      let trs = document.querySelectorAll("tr.song-details.active");
+      for (let tr of trs) {
+          tr.classList.remove("active");
+      }
+
+      let sel = "tr.song-details[data-idx='" + gCurrentPlaylistIdx + "']";
+      let trg = document.querySelector(sel);
+      if (trg) {
+          trg.classList.add("active");
+      } else {
+          console.warn("Cannot find row for idx ", gCurrentPlaylistIdx, sel);
       }
   }
 
@@ -58,12 +85,12 @@
 
       let idx = node.getAttribute("data-idx");
       if (idx != undefined) {
+          idx = parseInt(idx);
           let song = playList[idx];
           if (song) {
-              node.addEventListener('click', (event) => {
-                  player.pause();
-                  gCurrentPlaylistIdx = idx;
-                  setCurrentSong(song);
+              node.addEventListener('click', (event) => {                  
+                  player.pause();                  
+                  setCurrentSong(idx);
                   player.play();
               });
           }
@@ -72,22 +99,24 @@
 
   function initializePlayer (player) {
       if (playList.length > 0) {
-          setCurrentSong(playList[0]);
+          setCurrentSong(0);
       }
 
       player.addEventListener("ended", (e) => {
-          if (gCurrentPlaylistIdx + 1 > playList.length) {
+          let trgIdx = gCurrentPlaylistIdx;
+          console.info("Current index: ", trgIdx);
+          if (trgIdx + 1 > (playList.length - 1)) {
               if (loopControl.checked) {
-                  gCurrentPlaylistIdx = 0;
+                  trgIdx = 0;
               } else {
-                  console.info("Reached the end of the play list");
+                  console.info("Reached the end of the play list: " + trgIdx);
                   return;
               }
           } else {
-              gCurrentPlaylistIdx += 1;
+              trgIdx += 1;
           }
           
-          setCurrentSong(playList[gCurrentPlaylistIdx]);
+          setCurrentSong(trgIdx);
           player.play();
       });
 
@@ -119,25 +148,31 @@
       const BtnPrev = document.getElementById("player-control-prev");
       BtnPrev.addEventListener('click', (event) => {
           player.pause();
-          if (gCurrentPlaylistIdx - 1 >= 0) {
-              gCurrentPlaylistIdx = gCurrentPlaylistIdx - 1;
-              setCurrentSong(playList[gCurrentPlaylistIdx]);
+          let trgIdx = gCurrentPlaylistIdx;
+          if (trgIdx - 1 >= 0) {
+              trgIdx -= 1;
+              setCurrentSong(trgIdx);
+          } else {
+              console.warn("Decling to cycle past beginning of playlist");
           }
       });
 
       const BtnNext = document.getElementById("player-control-next");
       BtnNext.addEventListener('click', (event) => {
           player.pause();
-          if (gCurrentPlaylistIdx + 1 < playList.length) {
-              gCurrentPlaylistIdx = gCurrentPlaylistIdx + 1;
-              setCurrentSong(playList[gCurrentPlaylistIdx]);
+          let trgIdx = gCurrentPlaylistIdx; 
+          if ((trgIdx + 1) < (playList.length)) {
+              trgIdx += 1;
+              setCurrentSong(trgIdx);
+          } else {
+              console.warn("Declinging to forward past end of playlist", trgIdx, playList.length);
           }
       });
             
   }
 
-  initializePlayer(player);
   document.addEventListener('DOMContentLoaded', (event) => {
+      initializePlayer(player);
       for (let td of document.querySelectorAll("td.playlist-song")) {
           initializeSongClick(td);
       }

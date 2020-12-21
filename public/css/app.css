@@ -23,3 +23,7 @@ html {
 header .nav-link.active {
     text-decoration: underline;
 }
+
+.playlists .song-details.active {
+    background-color: #eeffff;
+}

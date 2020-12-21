@@ -43,13 +43,13 @@ sub remove_from_current ($self) {
 }
 
 sub clear_current ($self) {
-    $self->app->playlist = [];
+    @{ $self->app->playlist } = ();
 
     $self->respond_to(
                       'json' => sub { $self->render(json => {success => 1} ) },
-                                        'html' => sub {
-                                          $self->redirect_to("playlist_show_current");
-                                        }
+                      'html' => sub {
+                        $self->redirect_to("playlists_show_current");
+                      }
                      );
 
 }
