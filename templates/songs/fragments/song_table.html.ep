@@ -1,0 +1,63 @@
+<form class="form" method="GET" action="#" id="song-search">
+    <div class="input-group">
+        <input class="form-control" name="search" type="text" value="" placeholder="Term to filter rows by">
+        <div class="input-group-append">
+          <button role="submit"  class="btn btn-outline-secondary">
+            <i class="fas fa-search fa-fw"></i>
+          </button>
+        </div>
+    </div>
+</form>
+<div class="table-responsive">
+  <table id="song-list" class="table table-sm table-striped sortable">
+    <thead>
+      <tr>
+        <th>Song</th>
+        <th>Artist</th>
+        <th>Album</th>
+        <th>Genre</th>
+        <th>Duration</th>
+      </tr>
+    </thead>
+    <tbody class="small">
+      <% for my $song (@$songs) { %>
+      <tr>
+        <td class="song">
+          <a href="<%= url_for('playlists_add_to_current')->query(path => $song->{info}->{partialPath}) %>">
+            <%= $song->{name} %>
+          </a>
+        </td>
+        <td class="artist">
+          <% if ($song->{info}->{artist}) { %>
+          <a href="<%= url_for('playlists_add_artist')->query('name', $song->{info}->{artist}) %>">
+            <%= $song->{info}->{artist} %>
+          </a>
+          <% } else { %>
+          -
+          <% } %>
+        </td>
+        <td class="album">
+          <% if ($song->{info}->{album}) { %>
+          <a href="<%= url_for('playlists_add_album')->query('name', $song->{info}->{album}) %>">
+            <%= $song->{info}->{album} %>
+          </a>
+          <% } else { %>
+          -
+          <% } %>
+        </td>
+        <td class="genre">
+          <% if ($song->{info}->{genre}) { %>
+          <a href="<%= url_for('playlists_add_genre')->query('name', $song->{info}->{genre}) %>">
+            <%= $song->{info}->{genre} %>
+          </a>
+          <% } else { %>
+          -
+          <% } %>
+        </td>
+        <td><%= $song->{info}->{time_pretty} %> </td>
+      </tr>
+      <% } %>
+
+    </tbody>
+  </table>
+</div>

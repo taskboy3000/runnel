@@ -14,7 +14,6 @@ sub startup ($self) {
 
   # Configure the application
   $self->secrets($config->{secrets});
-
   $self->renderer->cache->max_keys(0);
   
   # Router
@@ -25,7 +24,8 @@ sub startup ($self) {
 
   # Songs 
   $r->get('/songs')->to('songs#index')->name("songs_index");
-  $r->get('/songs/:path')->to('songs#show')->name("songs_show");
+  $r->get('/songs/songs_table')->to('songs#song_table')->name("songs_table");
+  # $r->get('/songs/:path')->to('songs#show')->name("songs_show");
 
   $r->get('/playlists/current')->to('playlists#show_current')->name('playlists_show_current');
   $r->get('/playlists/current/add')->to('playlists#add_to_current')->name('playlists_add_to_current');
@@ -44,6 +44,8 @@ sub startup ($self) {
       $self->app->log->info("Scanning mp3 directory: " . $self->catalog->mp3BaseDirectory);
       $self->catalog->find_songs;
       $self->app->log->info("Done.");
+
+      
   } 
 
 }
