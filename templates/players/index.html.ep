@@ -61,7 +61,7 @@
       
       console.info("Setting current song to idx ", trgIdx, " which is ", song["info"]["title"]);
 
-      player.setAttribute("src", song.info.partialPath);
+      player.setAttribute("src", "/media/" + song.info.partialPath);
       currentSong.innerHTML = song.info.title;
 
       let trs = document.querySelectorAll("tr.song-details.active");

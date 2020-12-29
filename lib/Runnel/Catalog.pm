@@ -72,9 +72,7 @@ sub getMP3Info {
                                     }x);
     my $mp3 = MP3::Tag->new($filename) || die("[$filename]: $!");;
     
-    # get some information about the file in the easiest way
-    # /mp3 is a special route
-    my %info = (fullPath => $filename, partialPath => "/mp3/$parentDir");
+    my %info = (fullPath => $filename, partialPath => $parentDir);
     @info{ qw(title track artist album comment year genre) } = $mp3->autoinfo();
 
     # prefer on-disk ontology

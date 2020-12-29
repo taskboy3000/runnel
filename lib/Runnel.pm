@@ -1,10 +1,12 @@
 package Runnel;
 use Mojo::Base 'Mojolicious', -signatures;
 
+use FindBin;
 use Runnel::Catalog;
 
 has 'catalog';
 has 'playlist' => sub {[]};
+has 'cachePath' => "$FindBin::Bin/../cache";
 
 # This method will run once at server start
 sub startup ($self) {
@@ -15,6 +17,7 @@ sub startup ($self) {
   # Configure the application
   $self->secrets($config->{secrets});
   $self->renderer->cache->max_keys(0);
+  push @{$self->static->paths}, "$FindBin::Bin/../cache";
   
   # Router
   my $r = $self->routes;
@@ -22,6 +25,15 @@ sub startup ($self) {
   # Normal route to controller
   $r->get('/')->to('songs#index')->name("songs_index");
 
+  # Static mp3 files from user-specified directory
+  push @{$self->static->paths}, $config->{mp3BaseDirectory};
+  $r->get("/media/*song", sub ($self) {
+      my $path = $self->param("song");
+      $self->app->log->info("Server media path: " . $path);
+      
+      $self->reply->static($path);
+  });
+      
   # Songs 
   $r->get('/songs')->to('songs#index')->name("songs_index");
   $r->get('/songs/songs_table')->to('songs#song_table')->name("songs_table");
@@ -40,13 +52,14 @@ sub startup ($self) {
   $r->get("/player")->to('players#index')->name('players_index');
   
   if ($config->{mp3BaseDirectory}) {
+      # Aggressive...
+      unlink glob($self->cachePath . "/*");
+      
       my $cat = Runnel::Catalog->new(mp3BaseDirectory => $config->{mp3BaseDirectory}, app => $self);
       $self->catalog($cat);
       $self->app->log->info("Scanning mp3 directory: " . $self->catalog->mp3BaseDirectory);
       $self->catalog->find_songs;
       $self->app->log->info("Done.");
-
-      
   } 
 
 }
