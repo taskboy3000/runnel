@@ -25,6 +25,7 @@ sub startup ($self) {
   # Songs 
   $r->get('/songs')->to('songs#index')->name("songs_index");
   $r->get('/songs/songs_table')->to('songs#song_table')->name("songs_table");
+  $r->get('/songs/search')->to('songs#search')->name('songs_search');
   # $r->get('/songs/:path')->to('songs#show')->name("songs_show");
 
   $r->get('/playlists/current')->to('playlists#show_current')->name('playlists_show_current');

@@ -8,10 +8,12 @@ use Encode;
 use JSON;
 use MP3::Info;
 use MP3::Tag;
+use Tree::Trie;
 
 has 'app';
 has mp3BaseDirectory => '.';
 has songs   => sub {[]};
+has trie => sub { Tree::Trie->new };
 
 sub find_songs {
     my ($self, $dir) = @_;
@@ -45,7 +47,7 @@ sub find_songs {
     }
 
     # Sort
-    $self->songs  ( [ sort { $a->{name} cmp $b->{name} } @{ $self->songs } ]);
+    $self->songs( [ sort { $a->{name} cmp $b->{name} } @{ $self->songs } ]);
 }
 
 
@@ -104,12 +106,73 @@ sub getMP3Info {
 
     $info{channels} = $mp3Info->{STEREO} ? 2 : 1;
 
+    my %terms = map { lc($_) => 1 } split(/(?:\s|_)+/, $info{title}), split(/(?:\s|_)+/, $info{artist}), split(/(?:\s|_)+/, $info{album}), split(/(?:\s|_)+/, $info{genre});
+    
+    for my $word (keys %terms) {
+        next if !$word;
+        my $arefs = $self->trie->lookup_data($word);
+        if (!$arefs) {
+            $arefs = [];
+        }
+        push @$arefs, \%info;
+        $self->trie->add_data($word, $arefs);
+    }
+
     return \%info;
 }
+
 
 sub find_by_path ($self, $path) {
     return $self->get_songs(partialPath => $path)->[0];
 }
+
+
+# All terms are ANDed
+sub search ($self, $wordsAPtr, $sortBy='title') {
+    my %seen;
+    my @found;
+
+    my %paths;
+    for my $word (@$wordsAPtr) {
+        my $result = $self->search_by_word($word);
+
+        for my $info (@$result) {
+            if ($paths{ $info->{partialPath} }) {
+                push @{ $paths{ $info->{partialPath} } }, $info;
+            } else {
+                $paths{ $info->{partialPath} } = [ $info ];
+            }
+        }
+    }
+
+    # Each %info has to appear in *all* results to be returned
+    while (my ($path, $recs) = each %paths) {
+        # Comparing the number of matched records to the number of search terms
+        if (@$recs == @$wordsAPtr) {
+            push @found, $recs->[0]; # all of these recs point to the same hash
+        }
+    }
+    
+    return [ sort { $a->{$sortBy} cmp $b->{$sortBy} } @found ];
+}
+
+sub search_by_word ($self, $word) {
+    my %seen;
+    my @found;
+    my $aref = $self->trie->lookup_data(lc($word));
+    if ($aref) {
+        for my $info (@$aref) {
+            if ($seen{ $info->{partialPath} }) {
+                next;
+            }
+            push @found, $info;
+            $seen{ $info->{partialPath} } = 1;
+        }
+    }
+
+    return \@found;
+}
+
 
 sub get_songs ($self, $type, $criterion) {
     my @found;  
