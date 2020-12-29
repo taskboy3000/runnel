@@ -15,24 +15,24 @@ sub index ($self) {
 sub song_table ($self) {
     $self->stash("songs" => $self->app->catalog->songs);
     $self->respond_to(
-                      html => sub {
-                        my $path = Mojo::File->new($self->app->cachePath . "/song_table.html");
-                        if (-e $path) {
-                          $self->app->log->info("Using cached song table from: " . $path);
-                          $self->reply->file($path);
-                          return;
-                        }
-
-                        my $html = $self->render_to_string(template => "songs/fragments/song_table",
-                                                           format => "html",
-                                                           handler => "ep",
-                            );
-                        $self->app->log->info("Caching complete song table");
-                        write_file($path, $html, { binmode => ':utf8'});
-                        $self->reply->static("song_table.html");
-                        return;
-                      },
-                     );
+        html => sub {
+            my $path = Mojo::File->new($self->app->cachePath . "/song_table.html");
+            if (-e $path) {
+                $self->app->log->info("Using cached song table from: " . $path);
+                $self->reply->file($path);
+                return;
+            }
+            
+            my $html = $self->render_to_string(template => "songs/fragments/song_table",
+                                               format => "html",
+                                               handler => "ep",
+                );
+            $self->app->log->info("Caching complete song table");
+            write_file($path, { binmode => ':utf8'}, $html);
+            $self->reply->static("song_table.html");
+            return;
+        },
+        );
 }
 
 

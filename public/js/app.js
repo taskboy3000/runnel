@@ -19,6 +19,8 @@ function songSearchFormHandler (event) {
                 if (songSearchForm) {
                     songSearchForm.onsubmit = songSearchFormHandler;
                 }
+                handleMediaAddsAsynchronously();
+
             });
     } else {
         return loadSongsTable();
@@ -36,9 +38,38 @@ function loadSongsTable () {
                 if (songSearchForm) {
                     songSearchForm.onsubmit = songSearchFormHandler;
                 }
+                handleMediaAddsAsynchronously();
+
             });
     }
 };
+
+function handleMediaAddsAsynchronously() {
+    let anchors = document.querySelectorAll("section.songs table#song-list tbody a");
+    if (anchors) {
+        for (let anchor of anchors) {
+            anchor.addEventListener('click', (event) => {
+                event.preventDefault();
+                let target = event.target;
+                let url = target.getAttribute("href");
+                fetch(url, {
+                    headers: {"Accept": "application/json"}
+                })
+                    .then(response => { return response.json() })
+                    .then(json => {
+                        showToastNotice(json.msg);
+                    });
+            });
+        }
+    }
+}
+
+function showToastNotice (msg) {
+    const toast = document.getElementById("toast-notice");
+    toast.querySelector(".toast-body").innerHTML = msg;
+    $(toast).toast('show');
+}
+
 
 function init() {
     loadSongsTable();

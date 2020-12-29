@@ -1,13 +1,12 @@
 <form class="form" method="GET" action="#" id="song-search">
     <div class="input-group">
-        <input class="form-control" name="search" type="text" value="" placeholder="Term to filter rows by">
-        <div class="input-group-append">
-          <button role="submit"  class="btn btn-outline-secondary">
-            <i class="fas fa-search fa-fw"></i>
-          </button>
-        </div>
+      <div class="input-group-prepend">
+        <span class="input-group-text">Filter:</span>
+      </div>
+      <input class="form-control" name="search" type="text" value="" placeholder="Terms to filter rows by">
     </div>
 </form>
+
 <div class="table-responsive">
   <table id="song-list" class="table table-sm table-striped sortable">
     <thead>

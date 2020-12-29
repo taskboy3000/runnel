@@ -7,6 +7,24 @@ html {
     font-family: san-serif;
 }
 
+
+.controller .card,
+.input-group-text,
+.sortable th:first-child,
+.sortable td:first-child,
+.sortable th:last-child,
+.sortable td:last-child
+{
+    border-radius: 0;
+}
+
+.controller.songs .card-body,
+.controller.playlists .card-body {
+    max-height: 80vh;
+    min-height: 80vh;
+    overflow: auto;
+}
+
 .controller.songs td.song:hover {
     background-color: #eecccc;
 }
@@ -26,4 +44,8 @@ header .nav-link.active {
 
 .playlists .song-details.active {
     background-color: #eeffff;
+}
+
+::placeholder {
+    color: #ddd;
 }

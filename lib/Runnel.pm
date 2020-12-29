@@ -3,9 +3,10 @@ use Mojo::Base 'Mojolicious', -signatures;
 
 use FindBin;
 use Runnel::Catalog;
+use Runnel::Playlist;
 
 has 'catalog';
-has 'playlist' => sub {[]};
+has 'playlist' => sub { Runnel::Playlist->new };
 has 'cachePath' => "$FindBin::Bin/../cache";
 
 # This method will run once at server start
@@ -17,7 +18,11 @@ sub startup ($self) {
   # Configure the application
   $self->secrets($config->{secrets});
   $self->renderer->cache->max_keys(0);
-  push @{$self->static->paths}, "$FindBin::Bin/../cache";
+
+  my $cachePath = "$FindBin::Bin/../cache";
+  mkdir $cachePath if !-d $cachePath;
+
+  push @{$self->static->paths}, $cachePath;
   
   # Router
   my $r = $self->routes;
