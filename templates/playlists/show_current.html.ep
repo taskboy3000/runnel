@@ -5,7 +5,7 @@
     <%= include template => 'players/index', format => 'html', handler => 'ep' %>
     
     <div class="table-responsive" style="max-height: 600px;overflow-y:auto">
-        <table class="table table-sm table-striped">
+        <table class="table table-sm table-striped" id="playlist">
             <thead>
                 <tr>
                     <th>Song</th>

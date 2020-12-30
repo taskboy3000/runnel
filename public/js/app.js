@@ -64,6 +64,31 @@ function handleMediaAddsAsynchronously() {
     }
 }
 
+function handleMediaPlayistRemoveAsynchronously() {
+    let anchors = document.querySelectorAll("section.playlists table#playlist tbody a");
+    if (anchors) {
+        for (let anchor of anchors) {
+            anchor.addEventListener('click', (event) => {
+                event.preventDefault();
+                let target = event.target;
+                if (target.tagName == "I") {
+                    target = target.parentNode;
+                }
+                let url = target.getAttribute("href");
+                fetch(url, {
+                    headers: {"Accept": "application/json"}
+                })
+                    .then(response => { return response.json() })
+                    .then(json => {
+                        anchor.parentNode.parentNode.classList.add('d-none');
+                        showToastNotice(json.msg);
+                    });
+            });
+        }
+    }
+    
+}
+
 function showToastNotice (msg) {
     const toast = document.getElementById("toast-notice");
     toast.querySelector(".toast-body").innerHTML = msg;
@@ -73,6 +98,7 @@ function showToastNotice (msg) {
 
 function init() {
     loadSongsTable();
+    handleMediaPlayistRemoveAsynchronously();
 }
 
 document.addEventListener('DOMContentLoaded', (event) => {

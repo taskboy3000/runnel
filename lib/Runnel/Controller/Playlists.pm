@@ -30,11 +30,12 @@ sub add_to_current ($self) {
 sub remove_from_current ($self) {
     my $path = $self->param("path");
 
-    if (my $song = $self->app->catalog->find_by_path($path)) {
+    my $song;
+    if ($song = $self->app->catalog->find_by_path($path)) {
         $self->app->playlist->remove($song);
     }
 
-    my $msg = 'Removed song';
+    my $msg = 'Removed song ' . $song->{info}->{title};
     $self->respond_to(
                       'json' => sub { $self->render(json => {success => 1, msg => $msg } ) },
                       'html' => sub { $self->redirect_to("playlists_show_current") }
