@@ -1,4 +1,8 @@
-// app code here
+/*!
+ * Runnel App code
+ * Copyright Joe Johnston <jjohn@taskboy.com>
+ * Licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/legalcode)
+*/
 function songSearchFormHandler (event) {
     event.preventDefault();
     let term = document.getElementById('song-search').querySelector('input[name=search]').value;
