@@ -46,6 +46,7 @@ sub startup ($self) {
   # $r->get('/songs/:path')->to('songs#show')->name("songs_show");
 
   $r->get('/playlists/current')->to('playlists#show_current')->name('playlists_show_current');
+  $r->get('/playlists/current/playlist_table')->to('playlists#playlist_table')->name('playlists_table');
   $r->get('/playlists/current/add')->to('playlists#add_to_current')->name('playlists_add_to_current');
   $r->get('/playlists/current/add/artist')->to('playlists#add_artist')->name('playlists_add_artist');
   $r->get('/playlists/current/add/album')->to('playlists#add_album')->name('playlists_add_album');

@@ -57,7 +57,7 @@
       <script src="/js/contrib/bootstrap-v4.5.3.bundle.min.js"></script>
       <script src="/js/contrib/fontawesome-v5.15.1.js"></script>
       <script src="/js/contrib/sortable.min.js"></script>
-      <script src="/js/app.js"></script>
+      <script type="module" src="/js/app.js"></script>
     </div>    
   </body>
 </html>

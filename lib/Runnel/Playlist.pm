@@ -29,4 +29,9 @@ sub clear ($self) {
     @{ $self->list } = ();
 }
 
+sub sort_by_track_number ($self) {
+    return [ sort { $a->{info}->{track} cmp $b->{info}->{track} } @{$self->list}];
+
+}
+
 1;

@@ -36,7 +36,11 @@ sub find_songs {
 
         my $info = $self->getMP3Info("$dir/$file");
 
-        my $songRec = { name => $info->{title}, info => $info };
+        
+        my $songRec = {
+            name => $info->{title},
+            info => $info,
+        };
         my $s = $self->songs;
         push @$s, $songRec;
     }

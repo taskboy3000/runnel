@@ -1,13 +1,13 @@
 % use Mojo::JSON ('encode_json');
 <figure>
   <figcaption class="text-center bg-dark text-light text-nowrap p-1" style="overflow:hidden">
-    <div id="current_song"></div>
-    <div class="progress">
+    <div id="current-song"></div>
+    <div class="progress" id="progress-bar">
       <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="width:0"></div>
     </div>
   </figcaption>
   
-  <div class="btn-group player-controls d-table mx-auto" style="max-width:350px;overflow:hidden">
+  <div id="player-controls" class="btn-group player-controls d-table mx-auto" style="max-width:350px;overflow:hidden">
     <button id="player-control-prev" class="btn-secondary">
       <i class="fas fa-step-backward fa-fw fa-2x"></i>
     </button>
@@ -31,150 +31,3 @@
   
 </figure>
 
-<script>
-  const playList = <%== encode_json($playlist) %>;
-
-  const player = document.getElementById("audioPlayer");
-  const currentSong = document.getElementById("current_song");
-  const loopControl = document.getElementById("player-control-loop");
-  const progressBar = document.querySelector(".progress");
-  
-  let gCurrentPlaylistIdx = 0;
-  let gDate = new Date();
-  let gLastPBUpdate = gDate.getTime();
-  
-  function setCurrentSong (trgIdx) {
-      if (trgIdx < 0) {
-          console.error("Attempt to use a negative index for currentSong");
-          return;
-      } else if (trgIdx > (playList.length - 1)) {
-          console.error("Attempt to see idx past length of playlist: ", trgIdx);
-          return;          
-      }
-
-      gCurrentPlaylistIdx = trgIdx;
-      let song = playList[ gCurrentPlaylistIdx ];
-      if (!song) {
-          console.error("Cannot find a song in playlist at idx ", trgIdx);
-          return;
-      }
-      
-      console.info("Setting current song to idx ", trgIdx, " which is ", song["info"]["title"]);
-
-      player.setAttribute("src", "/media/" + song.info.partialPath);
-      currentSong.innerHTML = song.info.title;
-
-      let trs = document.querySelectorAll("tr.song-details.active");
-      for (let tr of trs) {
-          tr.classList.remove("active");
-      }
-
-      let sel = "tr.song-details[data-idx='" + gCurrentPlaylistIdx + "']";
-      let trg = document.querySelector(sel);
-      if (trg) {
-          trg.classList.add("active");
-      } else {
-          console.warn("Cannot find row for idx ", gCurrentPlaylistIdx, sel);
-      }
-  }
-
-  function initializeSongClick (node) {
-      if (!node) {
-          return;
-      }
-
-      let idx = node.getAttribute("data-idx");
-      if (idx != undefined) {
-          idx = parseInt(idx);
-          let song = playList[idx];
-          if (song) {
-              node.addEventListener('click', (event) => {                  
-                  player.pause();                  
-                  setCurrentSong(idx);
-                  player.play();
-              });
-          }
-      }
-  }
-
-  function initializePlayer (player) {
-      if (playList.length > 0) {
-          setCurrentSong(0);
-      }
-
-      player.addEventListener("ended", (e) => {
-          let trgIdx = gCurrentPlaylistIdx;
-          console.info("Current index: ", trgIdx);
-          if (trgIdx + 1 > (playList.length - 1)) {
-              if (loopControl.checked) {
-                  trgIdx = 0;
-              } else {
-                  console.info("Reached the end of the play list: " + trgIdx);
-                  return;
-              }
-          } else {
-              trgIdx += 1;
-          }
-          
-          setCurrentSong(trgIdx);
-          player.play();
-      });
-
-      player.addEventListener("timeupdate", (e) => {          
-          let target = e.target;
-          let D = new Date();
-          let now = D.getTime();
-          if (now - gLastPBUpdate < 250) {
-              return;
-          }
-          gLastPBUpdate = now;
-          
-          progressBar.setAttribute("aria-valuenow", target.currentTime);
-          progressBar.setAttribute("aria-valuemax", target.duration);
-          let width = Math.floor( (target.currentTime / target.duration) * 100);
-          progressBar.querySelector(".progress-bar").style.width = width + "%";
-      });
-      
-      const BtnStop = document.getElementById("player-control-stop");
-      BtnStop.addEventListener('click', (event) => {
-          player.pause();
-      });
-      
-      const BtnPlay = document.getElementById("player-control-play");
-      BtnPlay.addEventListener('click', (event) => {
-          player.play();
-      });
-
-      const BtnPrev = document.getElementById("player-control-prev");
-      BtnPrev.addEventListener('click', (event) => {
-          player.pause();
-          let trgIdx = gCurrentPlaylistIdx;
-          if (trgIdx - 1 >= 0) {
-              trgIdx -= 1;
-              setCurrentSong(trgIdx);
-          } else {
-              console.warn("Decling to cycle past beginning of playlist");
-          }
-      });
-
-      const BtnNext = document.getElementById("player-control-next");
-      BtnNext.addEventListener('click', (event) => {
-          player.pause();
-          let trgIdx = gCurrentPlaylistIdx; 
-          if ((trgIdx + 1) < (playList.length)) {
-              trgIdx += 1;
-              setCurrentSong(trgIdx);
-          } else {
-              console.warn("Declinging to forward past end of playlist", trgIdx, playList.length);
-          }
-      });
-            
-  }
-
-  document.addEventListener('DOMContentLoaded', (event) => {
-      initializePlayer(player);
-      for (let td of document.querySelectorAll("td.playlist-song")) {
-          initializeSongClick(td);
-      }
-  });
-</script>

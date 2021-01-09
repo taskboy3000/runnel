@@ -3,10 +3,28 @@ use Mojo::Base 'Mojolicious::Controller', '-signatures';
 
 sub show_current ($self) {
     my $p = $self->app->playlist;
-    $self->stash(playlist => $p->list);
-    $self->render();
+    return $self->respond_to(
+                             html => sub {
+                               $self->stash(playlist => $p->list);
+                               $self->render();
+                             },
+                             json => sub {
+                               my $list = $p->list;
+                               for my $song (@$list) {
+                                 $song->{addSongToPlaylist} = $self->url_for('playlists_add_to_current')->query('path', $song->{info}->{partialPath});
+                                 $song->{removeSongFromPlaylist} = $self->url_for('playlists_remove_from_current')->query('path', $song->{info}->{partialPath});
+                               }
+                               $self->render(json => $list);
+                             }
+                            );
 };
 
+
+sub playlist_table ($self) {
+    my $p = $self->app->playlist;
+    $self->stash(playlist => $p->list);
+    $self->render(template => "playlists/fragments/playlist_table", format => "html", handler => "ep");
+}
 
 sub add_to_current ($self) {
     my $path = $self->param("path");

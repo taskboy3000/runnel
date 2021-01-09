@@ -3,44 +3,30 @@
 <div class="card card-default">
   <div class="card-body m-0 p-0">
     <%= include template => 'players/index', format => 'html', handler => 'ep' %>
-    
-    <div class="table-responsive" style="max-height: 600px;overflow-y:auto">
+
+    <div id="playlist-wrapper">
+      <div class="table-responsive" style="max-height: 600px;overflow-y:auto">
         <table class="table table-sm table-striped" id="playlist">
-            <thead>
-                <tr>
-                    <th>Song</th>
-                    <th>Artist</th>
-                    <th>Album</th>
-                    <th>Duration</th>
-                    <th>&nbsp;</th>
-                </tr>
-            </thead>
-            <tbody class="small">
-              <% for (my $idx=0; $idx < @$playlist; $idx++) { %>
-              <% my $song = $playlist->[$idx]; %>
-              <tr class="song-details" data-idx="<%= $idx %>">
-                <td class="playlist-song" data-idx="<%= $idx %>">
-                  <a href="#">
-                    <%= $song->{name} %>
-                  </a>
-                </td>
-                <td>
-                    <%= $song->{info}->{artist} %>
-                </td>
-                <td><%= $song->{info}->{album} %></td>
-                <td><%= $song->{info}->{time_pretty} %> </td>
-                <td>
-                  <a href="<%= url_for("playlists_remove_from_current")->query("path", $song->{info}->{partialPath}) %>" class="btn btn-sm btn-danger">
-                    <i class="fas fa-trash-alt"></i>
-                  </a>
-                </td>
-              </tr>
-              <% } %>
-            </tbody>
+          <thead>
+            <tr>
+              <th>Song</th>
+              <th>Artist</th>
+              <th>Album</th>
+              <th>Duration</th>
+              <th>&nbsp;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="5">
+                <i class="fas fa-compact-disc fa-spin fa-2x text-secondary"></i>
+              </td>
+            </tr>
+          </tbody>
         </table>
-    </div> <!-- end .table-responsive -->
-
-
+      </div> <!-- end .table-responsive -->
+    </div>
+    
     <div class="pt-2 pb-2">
     <form class="form" action="<%= url_for("playlists_clear_current") %>" method="POST">
       <div class="text-right">          
@@ -52,3 +38,19 @@
   </div>
   <div class="card-footer">&nbsp;</div>
 </div>
+
+<template id="tmpl-playlist-row">
+    <tr class="song-details" data-idx>
+      <td class="playlist-song" data-id>
+        <a class="playlist-set-current" href></a>
+      </td>
+      <td class="artist"></td>
+      <td class="album"></td>
+      <td class="duration"></td>
+      <td>
+        <a class='playlist-remove-song' href class="btn btn-sm btn-danger">
+          <i class="fas fa-trash-alt text-danger"></i>
+        </a>
+      </td>
+    </tr>
+</template>

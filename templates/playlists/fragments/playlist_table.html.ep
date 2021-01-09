@@ -1,0 +1,35 @@
+<div class="table-responsive" style="max-height: 600px;overflow-y:auto">
+  <table class="table table-sm table-striped" id="playlist">
+    <thead>
+      <tr>
+        <th>Song</th>
+        <th>Artist</th>
+        <th>Album</th>
+        <th>Duration</th>
+        <th>&nbsp;</th>
+      </tr>
+    </thead>
+    <tbody class="small">
+      <% for (my $idx=0; $idx < @$playlist; $idx++) { %>
+         <% my $song = $playlist->[$idx]; %>
+      <tr class="song-details" data-idx="<%= $idx %>">
+        <td class="playlist-song" data-idx="<%= $idx %>">
+          <a class='playlist-set-current' href="#">
+            <%= $song->{name} %>
+          </a>
+        </td>
+        <td>
+          <%= $song->{info}->{artist} %>
+        </td>
+        <td><%= $song->{info}->{album} %></td>
+        <td><%= $song->{info}->{time_pretty} %> </td>
+        <td>
+          <a class='playlist-remove-song' href="<%= url_for("playlists_remove_from_current")->query("path", $song->{info}->{partialPath}) %>" class="btn btn-sm btn-danger">
+            <i class="fas fa-trash-alt"></i>
+          </a>
+        </td>
+      </tr>
+      <% } %>
+    </tbody>
+  </table>
+</div> <!-- end .table-responsive -->
