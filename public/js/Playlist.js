@@ -74,27 +74,26 @@ export class Playlist {
         tbody.innerHTML = '';
         tbody.appendChild(newTableBody);
         this.player.setCurrentSong(this.player.currentPlaylistIdx);
-        this.handleSetCurrentLinks();
         this.handleMediaPlaylistRemoveAsynchronously();
+        this.handleMediaPlaylistSetAsCurrent();
     }
 
-    handleSetCurrentLinks() {
-      for (let td of document.querySelectorAll('td.playlist-song')) {
-          let idx = td.getAttribute('data-idx');
-          if (idx != undefined) {
-              idx = parseInt(idx);
-              let song = this.player.playlist[idx];
-              if (song) {
-                  td.addEventListener('click', (event) => {                  
-                      this.player.pause();                  
-                      this.player.setCurrentSong(idx);
-                      this.player.play();
-                  });
-              }
-          }
-      }
+    handleMediaPlaylistSetAsCurrent() {
+        let self = this;
+        let anchors = document.querySelectorAll("#playlist tbody a.playlist-set-current");
+        if (anchors) {
+            for (let anchor of anchors) {
+                anchor.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    let target = event.target;
+                    this.player.pause();
+                    self.player.setCurrentSong(target.parentNode.getAttribute("data-idx"));
+                    this.player.play();
+                });
+            }
+        }
     }
-
+    
     handleMediaPlaylistRemoveAsynchronously() {
         let self = this;
         let anchors = document.querySelectorAll("#playlist tbody a.playlist-remove-song");
