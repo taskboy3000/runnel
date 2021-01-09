@@ -2,7 +2,7 @@
 
 ## Introduction
 
-(TODO: philosophy, expected use cases, mp3 directory layout, how informatio is scaped)
+(TODO: philosophy, expected use cases, mp3 directory layout, how information is scaped)
         
 ## System Requirements  
 
