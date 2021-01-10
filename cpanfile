@@ -1,4 +1,5 @@
 requires 'File::Slurp';
+requires 'JSON';
 requires 'MP3::Info';
 requires 'MP3::Tag';
 requires 'Modern::Perl';    
