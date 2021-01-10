@@ -126,6 +126,8 @@ export class Player {
     }
 
     setCurrentSong(trgIdx) {
+        trgIdx = parseInt(trgIdx);
+
         if (this.playlist.length == 0) {
             return;
         }
