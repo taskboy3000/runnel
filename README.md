@@ -17,6 +17,7 @@ this project, but it is not required.
 * git clone https://github.com/taskboy3000/runnel.git
 * cd runnel
 * cpanm --installdeps .
+* cp runnel-dist.yml runnel.yml
 * edit runnel.yml, point mp3BaseDirectory to the root of your mp3 collection
 * run script/runnel daemon -l http://*:3000
 
