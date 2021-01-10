@@ -30,8 +30,11 @@ sub clear ($self) {
 }
 
 sub sort_by_track_number ($self) {
-    return [ sort { $a->{info}->{track} cmp $b->{info}->{track} } @{$self->list}];
+    return [ sort { $a->{info}->{track} cmp $b->{info}->{track} } @{$self->list} ];
+}
 
+sub sort_by_path ($self) {
+    return [ sort { $a->{info}->{partialPath} cmp $b->{info}->{partialPath} } @{$self->list} ];
 }
 
 1;
