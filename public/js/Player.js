@@ -61,13 +61,19 @@ export class Player {
 
                            
     handleEndedEvent (event) {
-        if (!this.loopControlNode.checked) {
-            console.info('Reached the end of the play list: ' + trgIdx);
-            return false;
-        } 
+        // When a track ends, play the next one, if there is one to play.
+        // Reset to begining if looping is enabled.
+        if (this.next()) {
+            this.play();
+            return true;
+        } else if (this.loopControlNode.checked) {
+            this.setCurrentSong(0);
+            this.play();
+            return true;
+        }
 
-        this.setCurrentSong(0);
-        this.play();
+        console.info('Reached the end of the play list: ' + this.currentPlaylistIdx);
+        return false;
     }
 
     handleTimeUpdateEvent (event) {
