@@ -91,9 +91,12 @@ sub getMP3Info {
 
     # prefer on-disk ontology
     $info{ title } ||= "unknown";
-    $info{ artist } = $artist if defined $artist;
-    $info{ album }  = $album  if defined $album;
-
+    if (!defined $info{ artist } && defined $artist) {
+        $info{ artist } = $artist;
+    }
+    if (!defined $info{album} && defined $album) {
+        $info{ album }  = $album;
+    }
     if ( $info{ track } eq '0/0' ) {
         if ( $filename =~ /^(\d+)/ ) {
             $info{ track } = sprintf( "%d", $1 );
