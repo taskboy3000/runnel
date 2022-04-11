@@ -53,15 +53,12 @@ sub find_songs {
     # Sort by Album next
     # Sort by Track last
     my @sorted = sort {
-        $a->{info}->{artist} cmp $b->{info}->{artist}
-          ||
-          $a->{info}->{album} cmp $b->{info}->{album}
-          ||
-          $a->{info}->{track} <=> $b->{info}->{track}
+               $a->{ info }->{ artist } cmp $b->{ info }->{ artist }
+            || $a->{ info }->{ album } cmp $b->{ info }->{ album }
+            || $a->{ info }->{ track } <=> $b->{ info }->{ track }
     } @{ $self->songs };
 
-
-    return $self->songs(\@sorted);
+    return $self->songs( \@sorted );
 }
 
 sub getMP3Info {
@@ -103,7 +100,7 @@ sub getMP3Info {
         } else {
             $info{ track } = 1;
         }
-    } elsif ($info{track} =~ /(\d+)/) {
+    } elsif ( $info{ track } =~ /(\d+)/ ) {
         $info{ track } = $1 + 0;
     } else {
         $info{ track } = 0;

@@ -3,14 +3,14 @@ use Mojo::Base 'Mojolicious::Controller', '-signatures';
 
 use JSON;
 
-sub index ($self) {
+sub index ( $self ) {
     my $playlistARef = [];
-    if (my $p = $self->app->playlist) {
+    if ( my $p = $self->app->playlist ) {
         $playlistARef = $p;
-    } 
+    }
 
-    $self->stash("playlist", $playlistARef);
-    $self->respond_to('html' => sub { $self->render });
+    $self->stash( "playlist", $playlistARef );
+    $self->respond_to( 'html' => sub { $self->render } );
 }
 
 1;
