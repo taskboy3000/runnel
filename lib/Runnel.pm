@@ -24,6 +24,8 @@ sub startup ( $self ) {
 
     push @{ $self->static->paths }, $cachePath;
 
+    $self->defaults(layout => 'default');
+
     # Router
     my $r = $self->routes;
 

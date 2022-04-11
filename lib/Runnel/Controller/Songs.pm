@@ -2,7 +2,7 @@ package Runnel::Controller::Songs;
 
 use FindBin;
 use File::Slurp;
-use Mojo::Base 'Mojolicious::Controller', '-signatures';
+use Mojo::Base 'Runnel::Controller', '-signatures';
 use Mojo::File;
 
 sub index ( $self ) {
@@ -21,7 +21,6 @@ sub song_table ( $self ) {
                 $self->reply->file( $path );
                 return;
             }
-
             my $html = $self->render_to_string(
                 template => "songs/fragments/song_table",
                 format   => "html",

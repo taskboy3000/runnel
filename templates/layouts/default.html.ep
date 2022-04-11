@@ -1,15 +1,11 @@
-<%
-  our $controllerShortName = do { my $n = ref($c); $n =~ s/^((\w+)::){2}//; $n =~ s/::/_/g; lc($n) };
-%>
 <!DOCTYPE html>
 <html lang="en-us">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <title><%= title %></title>
+    <title><%= title || 'Runnel' %></title>
 
-    
     <link rel="stylesheet" href="/css/contrib/bootstrap-v4.5.3.min.css">
     <link rel="stylesheet" href="/css/contrib/fontawesome-v5.15.1.css">
     <link rel="stylesheet" href="/css/contrib/sortable.min.css">
@@ -20,16 +16,17 @@
     <header class="bg-primary">
       <ul class="nav justify-content-center">
         <li class="nav-item">
-	      <a class="nav-link text-light <%= $controllerShortName =~ /songs$/ ? 'active' : '' %>" href="<%= url_for("songs_index") %>">Songs</a>
+	      <a class="nav-link text-light <%= $c->short_name =~ /songs$/ ? 'active' : '' %>" href="<%= url_for("songs_index") %>">Songs</a>
         </li>
         <li class="nav-item">
-	      <a class="nav-link text-light <%= $controllerShortName =~ /playlists$/ ? 'active' : '' %>" href="<%= url_for("playlists_show_current") %>">Current Playlist</a>
+	      <a class="nav-link text-light <%= $c->short_name =~ /playlists$/ ? 'active' : '' %>" href="<%= url_for("playlists_show_current") %>">Current Playlist</a>
         </li>
       </ul>
     </header>
       
     <main>
-      <section class="content controller <%= $controllerShortName %>"><%= content %></section>
+      <section class="content controller <%= $c->short_name %>"><%= content %></section>
+      
     </main>
 
     <footer>

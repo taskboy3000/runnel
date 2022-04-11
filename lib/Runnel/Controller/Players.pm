@@ -1,5 +1,5 @@
 package Runnel::Controller::Players;
-use Mojo::Base 'Mojolicious::Controller', '-signatures';
+use Mojo::Base 'Runnel::Controller', '-signatures';
 
 use JSON;
 

@@ -1,5 +1,5 @@
 package Runnel::Controller::Playlists;
-use Mojo::Base 'Mojolicious::Controller', '-signatures';
+use Mojo::Base 'Runnel::Controller', '-signatures';
 
 sub show_current ( $self ) {
     my $p = $self->app->playlist;

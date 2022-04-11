@@ -1,4 +1,3 @@
-% include layout 'default';
 <div class="jumbotron">
   <h2>Catalog</h2>
 </div>
