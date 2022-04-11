@@ -1,7 +1,8 @@
 package Runnel::Controller::Songs;
 
-use FindBin;
+use File::Basename;
 use File::Slurp;
+use FindBin;
 use Mojo::Base 'Runnel::Controller', '-signatures';
 use Mojo::File;
 
@@ -26,8 +27,17 @@ sub song_table ( $self ) {
                 format   => "html",
                 handler  => "ep",
             );
-            $self->app->log->info( "Caching complete song table" );
-            write_file( $path, { binmode => ':utf8' }, $html );
+
+            if ( -w dirname( $path ) ) {
+                write_file( $path, { binmode => ':utf8' }, $html );
+                $self->app->log->info( "Caching complete song table" );
+            } else {
+                $self->app->log->warn(
+                    "Cache dir for $path is not writeable" );
+                return $self->render( text =>  $self->app->cachePath
+                        . "/ is not writable.  Please chmod 0755 "
+                        . $self->app->cachePath );
+            }
             $self->reply->static( "song_table.html" );
             return;
         },

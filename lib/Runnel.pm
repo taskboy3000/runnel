@@ -20,7 +20,12 @@ sub startup ( $self ) {
     $self->renderer->cache->max_keys( 0 );
 
     my $cachePath = "$FindBin::Bin/../cache";
-    mkdir $cachePath if !-d $cachePath;
+    if (-d $cachePath) {
+        $self->app->log->info("Cleaning out old files in $cachePath");
+        unlink(glob("$cachePath/*"));
+    } else {
+        mkdir $cachePath;
+    }
 
     push @{ $self->static->paths }, $cachePath;
 
