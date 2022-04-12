@@ -10,7 +10,7 @@ sub index ( $self ) {
     }
 
     $self->stash( "playlist", $playlistARef );
-    $self->respond_to( 'html' => sub { $self->render } );
+    $self->respond_to( 'html' => sub { $self->render(layout=>"default") } );
 }
 
 1;

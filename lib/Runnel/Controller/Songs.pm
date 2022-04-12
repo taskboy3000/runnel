@@ -7,7 +7,7 @@ use Mojo::Base 'Runnel::Controller', '-signatures';
 use Mojo::File;
 
 sub index ( $self ) {
-    $self->respond_to( html => sub { $self->render() } );
+    $self->respond_to( html => sub { $self->render(layout => "default") } );
 }
 
 sub song_table ( $self ) {

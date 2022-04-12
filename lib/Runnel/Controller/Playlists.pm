@@ -7,7 +7,7 @@ sub show_current ( $self ) {
     return $self->respond_to(
         html => sub {
             $self->stash( playlist => $p->sort_by_path );
-            $self->render();
+            $self->render(layout => "default");
         },
         json => sub {
             my $list = $p->sort_by_path;
