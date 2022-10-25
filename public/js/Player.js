@@ -6,43 +6,51 @@ export class Player {
         this.currentSongNodeName = 'current-song';
         this.loopControlNodeName = 'player-control-loop';
         this.progressBarNodeName = 'progress-bar';
-        
-        this.currentPlaylistIdx = 0;        
+
+        this.currentPlaylistIdx = 0;
         this.lastPBUpdate = 0;
     }
 
     initialize () {
-        
+
         this.playerNode = document.getElementById(this.playerNodeName);
         this.playerControlsNode = document.getElementById(this.playerControlsNodeName);
         this.loopControlNode = document.getElementById(this.loopControlNodeName);
         this.progressBarNode = document.getElementById(this.progressBarNodeName);
         this.currentSongNode = document.getElementById(this.currentSongNodeName);
-       
+
         this.playerNode.addEventListener('ended', (event) => { this.handleEndedEvent(event) });
         this.playerNode.addEventListener('timeupdate', (event) => { this.handleTimeUpdateEvent(event) });
-        
+
         // Initialize player transport buttons
         document.getElementById('player-control-stop').addEventListener('click', (event) => {
             this.pause();
         });
-        
+
         document.getElementById('player-control-play').addEventListener('click', (event) => {
             this.play();
         });
-        
+
         document.getElementById('player-control-prev').addEventListener('click', (event) => {
             this.pause();
             this.back();
             this.play();
         });
-        
+
         document.getElementById('player-control-next').addEventListener('click', (event) => {
             this.pause();
             this.next();
             this.play();
         });
-        
+
+        let btnShuffle = document.getElementById("btn-shuffle-playlist");
+        if (btnShuffle) {
+            btnShuffle.addEventListener('click', (event) => {
+                event.preventDefault();
+                this.handlePlaylistShuffle();
+            });
+        }
+
         return new Promise((res, rej) => {
             res(this.getCurrentPlaylist())
         });
@@ -59,7 +67,30 @@ export class Player {
             .then((json) => { this.playlist = json});
     }
 
-                           
+    handlePlaylistShuffle () {
+        this.pause();
+        if (this.playlist.length < 1) {
+            return;
+        }
+
+        // Single pass, in-place shuffle
+        for (let srcIdx = 0; srcIdx < this.playlist.length; srcIdx++) {
+            let src = this.playlist[ srcIdx ];
+            let trgIdx = Math.floor(Math.random() * this.playlist.length);
+            let trg = this.playlist[trgIdx];
+
+            this.playlist[srcIdx] = trg;
+            this.playlist[trgIdx] = src;
+        }
+
+        this.setCurrentSong(0);
+        let event = new CustomEvent('runnel.playlist.changed');
+        let playlist = document.getElementById('playlist');
+        if (playlist) {
+            playlist.dispatchEvent(event);
+        }
+    }
+
     handleEndedEvent (event) {
         // When a track ends, play the next one, if there is one to play.
         // Reset to begining if looping is enabled.
@@ -85,7 +116,7 @@ export class Player {
             return;
         }
         this.lastPBUpdate = now;
-          
+
         this.progressBarNode.setAttribute('aria-valuenow', target.currentTime);
         this.progressBarNode.setAttribute('aria-valuemax', target.duration);
         let width = Math.floor( (target.currentTime / target.duration) * 100);
@@ -169,6 +200,6 @@ export class Player {
     clearCurrentSong() {
         this.currentPlaylistIdx = 0;
         this.playerNode.setAttribute('src', '');
-        this.currentSongNode.innerHTML = '';        
+        this.currentSongNode.innerHTML = '';
     }
 }

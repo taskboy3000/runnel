@@ -148,4 +148,20 @@ sub add_genre ( $self ) {
     );
 }
 
+sub random {
+    my ($self) = @_;
+    my $limit = $self->param("limit") || 100;
+
+    my $songs = $self->app->catalog->get_random_songs('', $limit);
+    for my $song  (@$songs) {
+        $self->app->playlist->add($song);
+        my $msg = sprintf( 'Added %s', $song->{ info }->{ title } );
+        $self->app->log->info($msg);
+    }
+
+    $self->respond_to(
+                      'html' => sub { $self->redirect_to("playlists_show_current") }
+                     );
+}
+
 1;

@@ -21,6 +21,11 @@
         <li class="nav-item">
 	      <a class="nav-link text-light <%= $c->short_name =~ /playlists$/ ? 'active' : '' %>" href="<%= url_for("playlists_show_current") %>">Current Playlist</a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link text-light" href="<%= url_for("playlists_random")->query("limit" => 100) %>">
+            100 Random Tracks
+          </a>
+        </li>
       </ul>
     </header>
       

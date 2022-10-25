@@ -74,7 +74,7 @@ sub startup ( $self ) {
         ->name( 'playlists_remove_from_current' );
     $r->post( '/playlists/current/clear' )->to( 'playlists#clear_current' )
         ->name( 'playlists_clear_current' );
-
+    $r->get('/playlists/random')->to('playlists#random')->name('playlists_random');
     $r->get( "/player" )->to( 'players#index' )->name( 'players_index' );
 
     if ( $config->{ mp3BaseDirectory } ) {
