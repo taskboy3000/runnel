@@ -141,6 +141,7 @@ export class Player {
 
         this.currentPlaylistIdx += 1;
         this.setCurrentSong(this.currentPlaylistIdx);
+
         return true;
     }
 
@@ -182,6 +183,7 @@ export class Player {
 
         this.playerNode.setAttribute('src', '/media/' + song.info.partialPath);
         this.currentSongNode.innerHTML = song.info.title;
+        document.title = song.info.title;
 
         let trs = document.querySelectorAll('tr.song-details.active');
         for (let tr of trs) {
