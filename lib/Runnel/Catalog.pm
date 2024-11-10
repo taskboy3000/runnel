@@ -15,9 +15,8 @@ has mp3BaseDirectory => '.';
 has songs            => sub { [] };
 has trie             => sub { Tree::Trie->new };
 
-sub find_songs {
-    my ( $self, $dir ) = @_;
-    $dir //= $self->mp3BaseDirectory;
+sub find_songs ( $self, $dir='' ) {
+    $dir ||= $self->mp3BaseDirectory;
 
     opendir my $dh, $dir or die( $! );
 
@@ -61,11 +60,9 @@ sub find_songs {
     return $self->songs( \@sorted );
 }
 
-sub getMP3Info {
-    my ( $self, $filename ) = @_;
-
+sub getMP3Info ( $self, $filename='' ) {
     if ( !-e $filename ) {
-        $self->app->log->warn( "cannot parse '$filename'" );
+        $self->app->log->warn( "cannot find '$filename'" );
         return;
     }
 

@@ -30,7 +30,7 @@ sub song_table ( $self ) {
 
             if ( -w dirname( $path ) ) {
                 write_file( $path, { binmode => ':utf8' }, $html );
-                $self->app->log->info( "Caching complete song table" );
+                $self->app->log->info( "Caching complete song table to $path" );
             } else {
                 $self->app->log->warn(
                     "Cache dir for $path is not writeable" );
