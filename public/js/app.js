@@ -73,8 +73,10 @@ function handleMediaAddsAsynchronously() {
 
 function showToastNotice (msg) {
     const toast = document.getElementById("toast-notice");
+
     toast.querySelector(".toast-body").innerHTML = msg;
-    $(toast).toast('show');
+    new bootstrap.Toast(toast, {}).show();
+    
 }
 
 

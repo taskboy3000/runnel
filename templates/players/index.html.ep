@@ -1,23 +1,23 @@
 % use Mojo::JSON ('encode_json');
 <figure>
-  <figcaption class="text-center bg-dark text-light text-nowrap p-1" style="overflow:hidden">
+  <figcaption class="text-center bg-secondary text-light text-nowrap p-1" style="overflow:hidden">
     <div id="current-song"></div>
     <div class="progress" id="progress-bar">
       <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="width:0"></div>
     </div>
   </figcaption>
   
-  <div id="player-controls" class="btn-group player-controls d-table mx-auto" style="max-width:350px;overflow:hidden">
-    <button id="player-control-prev" class="btn-secondary">
+  <div id="player-controls" class="player-controls d-table mx-auto" style="max-width:350px;overflow:hidden">
+    <button id="player-control-prev" class="btn btn-secondary me-3">
       <i class="fas fa-step-backward fa-fw fa-2x"></i>
     </button>
-    <button id="player-control-play" class="btn-secondary">
+    <button id="player-control-play" class="btn btn-secondary me-3">
       <i class="fas fa-play fa-fw fa-2x"></i>
     </button>
-    <button id="player-control-next" class="btn-secondary">
+    <button id="player-control-next" class="btn btn-secondary me-3">
       <i class="fas fa-play fa-step-forward fa-2x"></i>      
     </button>
-    <button id="player-control-stop" class="btn-secondary">
+    <button id="player-control-stop" class="btn btn-secondary me-3">
       <i class="fas fa-play fa-stop fa-2x"></i>
     </button>
   </div>
@@ -29,7 +29,7 @@
     </div>
     <div class="col-sm-6" style="height:30px">
       <button id="btn-shuffle-playlist" class="btn btn-light btn-sm">
-        <i class="fas fa-light fa-dice fa-fw"></i>
+        <i class="fas fa-solid fa-dice fa-fw"></i>
         Shuffle
       </button>
     </div>
