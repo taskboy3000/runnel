@@ -27,23 +27,6 @@ This project is built on the excellent MVC framework, Mojolicious (https://mojol
     
 ## Copyright
 
-jQuery 3:
-    Author: https://jquery.com/
-    Licenses:
-        - MIT License (https://jquery.org/license)
-
-Bootstrap 4.5:
-    Author: https://getbootstrap.com/
-    Licenses:
-        - MIT License (https://github.com/twbs/bootstrap/blob/main/LICENSE)
-
-Font Awesome (Free) v5.15.1:
-    Author: https://fontawesome.com
-    Licenses:
-        - Icons are CC BY 4.0
-        - Fonts are SIL OFL 1.1
-        - Code is MIT License
-
 sortable:
     Author: https://github.com/tofsjonas/sortable
     Licenses:

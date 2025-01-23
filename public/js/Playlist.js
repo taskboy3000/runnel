@@ -8,6 +8,7 @@ export class Playlist {
     }
 
     initialize () {
+        let self = this;
         new Promise((fncResolve, fncReject) => {
             fncResolve(this.player.initialize())
         },
@@ -17,6 +18,12 @@ export class Playlist {
         ).then(() => {
             this.player.setCurrentSong(0);
         });
+        let playlist = document.getElementById('playlist');
+        if (playlist) {
+            playlist.addEventListener('runnel.playlist.changed', (event) => {
+                self.renderPlaylist();
+            });
+        }
     }
 
     renderPlaylist() {
@@ -84,6 +91,7 @@ export class Playlist {
         this.player.setCurrentSong(this.player.currentPlaylistIdx);
         this.handleMediaPlaylistRemoveAsynchronously();
         this.handleMediaPlaylistSetAsCurrent();
+
     }
 
     handleMediaPlaylistSetAsCurrent() {

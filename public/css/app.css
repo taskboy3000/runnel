@@ -55,3 +55,7 @@ header .nav-link.active {
 ::placeholder {
     color: #ddd;
 }
+
+.sortable td {
+    padding: 4px !important;
+}

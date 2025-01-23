@@ -15,9 +15,8 @@ has mp3BaseDirectory => '.';
 has songs            => sub { [] };
 has trie             => sub { Tree::Trie->new };
 
-sub find_songs {
-    my ( $self, $dir ) = @_;
-    $dir //= $self->mp3BaseDirectory;
+sub find_songs ( $self, $dir='' ) {
+    $dir ||= $self->mp3BaseDirectory;
 
     opendir my $dh, $dir or die( $! );
 
@@ -61,11 +60,9 @@ sub find_songs {
     return $self->songs( \@sorted );
 }
 
-sub getMP3Info {
-    my ( $self, $filename ) = @_;
-
+sub getMP3Info ( $self, $filename='' ) {
     if ( !-e $filename ) {
-        $self->app->log->warn( "cannot parse '$filename'" );
+        $self->app->log->warn( "cannot find '$filename'" );
         return;
     }
 
@@ -110,11 +107,17 @@ sub getMP3Info {
     }
 
     my $mp3Info = get_mp3info( $filename );
-    $info{ bitrate } = $mp3Info->{ BITRATE } * 1000;
-    $info{ rate }    = $mp3Info->{ FREQUENCY } * 1000;
+    if ($mp3Info->{ BITRATE }) {
+        $info{ bitrate } = $mp3Info->{ BITRATE } * 1000;
+    }
+
+    if ($mp3Info->{FREQUENCY}) {
+        $info{ rate }    = $mp3Info->{ FREQUENCY } * 1000;
+    }
+
     $info{ mode }    = $mp3Info->{ VBR } ? 'vbr' : 'cbr';
     $info{ size }    = $mp3Info->{ SIZE };
-    $info{ time }    = int( $mp3Info->{ SECS } );
+    $info{ time }    = int( $mp3Info->{ SECS } // 0 );
 
     # convert to hh::mm::ss
     my $minutes = int( $info{ time } / 60 );
@@ -202,6 +205,33 @@ sub get_songs ( $self, $type, $criterion ) {
     }
 
     return \@found;
+}
+
+
+sub get_random_songs ($self, $term, $limit) {
+    $limit //= 200;
+
+    my $songs = [];
+    if ($term) {
+        $songs = $self->search_by_word($term);
+    } else {
+        my $listSize = @{ $self->songs };
+        my %seen;
+        for (my $i=0; $i < $limit; $i++) {
+            my $idx = int(rand($listSize));
+            if (exists $seen{$idx}) {
+                next;
+            }
+            push @$songs, $self->songs->[$idx];
+            $seen{$idx} = 1;
+        }
+    }
+
+    if ($limit && @$songs > $limit) {
+        @$songs = @{$songs}[0 .. ($limit - 1)];
+    }
+
+    return $songs;
 }
 
 1;
