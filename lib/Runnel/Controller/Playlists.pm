@@ -6,11 +6,11 @@ sub show_current ( $self ) {
 
     return $self->respond_to(
         html => sub {
-            $self->stash( playlist => $p->sort_by_path );
+            $self->stash( playlist => $p->sort_by_track_number );
             $self->render(layout => "default");
         },
         json => sub {
-            my $list = $p->sort_by_path;
+            my $list = $p->sort_by_track_number;
             for my $song ( @$list ) {
                 $song->{ addSongToPlaylist } =
                     $self->url_for( 'playlists_add_to_current' )
@@ -26,7 +26,7 @@ sub show_current ( $self ) {
 
 sub playlist_table ( $self ) {
     my $p = $self->app->playlist;
-    $self->stash( playlist => $p->sort_by_path );
+    $self->stash( playlist => $p->sort_by_track_number );
     $self->render(
         template => "playlists/fragments/playlist_table",
         format   => "html",

@@ -23,14 +23,17 @@ sub remove ( $self, $item ) {
     @{ $self->list } = @tmp;
 }
 
+
 sub clear ( $self ) {
     @{ $self->list } = ();
 }
 
+
 sub sort_by_track_number ( $self ) {
-    return [ sort { $a->{ info }->{ track } cmp $b->{ info }->{ track } }
+    return [ sort { $a->{ info }->{ track } <=> $b->{ info }->{ track } }
             @{ $self->list } ];
 }
+
 
 sub sort_by_path ( $self ) {
     return [

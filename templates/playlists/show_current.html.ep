@@ -5,11 +5,13 @@
     <div id="playlist-wrapper">
       <div class="table-responsive" style="max-height: 600px;overflow-y:auto">
         <table class="table table-sm table-striped" id="playlist">
-          <thead>
+          <thead class="table-dark">
             <tr>
               <th>Song</th>
               <th>Artist</th>
               <th>Album</th>
+              <th>Track</th>
+              <th>Genre</th>
               <th>Duration</th>
               <th>&nbsp;</th>
             </tr>
@@ -42,8 +44,10 @@
       <td class="playlist-song" data-id>
         <a class="playlist-set-current" href></a>
       </td>
-      <td class="artist"></td>
-      <td class="album"></td>
+      <td class="artist">-</td>
+      <td class="album">-</td>
+      <td class="track">-</td>
+      <td class="genre">-</td>
       <td class="duration"></td>
       <td>
         <a class='playlist-remove-song' href class="btn btn-sm btn-danger">

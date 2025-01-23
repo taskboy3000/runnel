@@ -1,5 +1,5 @@
 import { Player } from './Player.js';
-import { Template} from './Template.js';
+import { Template } from './Template.js';
 
 export class Playlist {
     constructor () {
@@ -57,6 +57,14 @@ export class Playlist {
                     value: song.info.album,
                 },
                 {
+                    target: '.track',
+                    value: song.info.track,
+                },
+                {
+                    target: '.genre',
+                    value: song.info.genre,
+                },
+                {
                     target: '.duration',
                     value: song.info.time_pretty,
                 },
@@ -64,7 +72,7 @@ export class Playlist {
                     target: '.playlist-remove-song',
                     value: song.removeSongFromPlaylist,
                     attr: 'href',
-                },
+                }
                 
             ];
             newTableBody.appendChild(this.Template.render(replacements));
