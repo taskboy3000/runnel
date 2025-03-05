@@ -1,7 +1,8 @@
 package Runnel::Catalog;
-use Mojo::Base '-base', '-signatures';
+use Mojo::Base '-base';
 use Modern::Perl;
-no warnings 'experimental::signatures';
+
+use experimental 'signatures';
 
 use Cwd 'abs_path';
 use Encode;
