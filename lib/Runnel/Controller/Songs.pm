@@ -7,7 +7,7 @@ use Mojo::Base 'Runnel::Controller', '-signatures';
 use Mojo::File;
 
 sub index ( $self ) {
-    $self->respond_to( html => sub { $self->render(layout => "default") } );
+    $self->respond_to( html => sub { $self->render( layout => "default" ) } );
 }
 
 sub song_table ( $self ) {
@@ -30,11 +30,12 @@ sub song_table ( $self ) {
 
             if ( -w dirname( $path ) ) {
                 write_file( $path, { binmode => ':utf8' }, $html );
-                $self->app->log->info( "Caching complete song table to $path" );
+                $self->app->log->info(
+                    "Caching complete song table to $path" );
             } else {
                 $self->app->log->warn(
                     "Cache dir for $path is not writeable" );
-                return $self->render( text =>  $self->app->cachePath
+                return $self->render( text => $self->app->cachePath
                         . "/ is not writable.  Please chmod 0755 "
                         . $self->app->cachePath );
             }

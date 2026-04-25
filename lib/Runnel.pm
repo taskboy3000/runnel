@@ -13,16 +13,17 @@ has 'cachePath' => "$FindBin::Bin/../cache";
 sub startup ( $self ) {
 
     # Load configuration from config file
-    my $config = $self->plugin( 'NotYAMLConfig' );
+    my $config_file = $ENV{ 'RUNNEL_YML' } || "$FindBin::Bin/../runnel.yml";
+    my $config = $self->plugin( 'NotYAMLConfig', { file => $config_file } );
 
     # Configure the application
     $self->secrets( $config->{ secrets } );
     $self->renderer->cache->max_keys( 0 );
 
     my $cachePath = "$FindBin::Bin/../cache";
-    if (-d $cachePath) {
-        $self->app->log->info("Cleaning out old files in $cachePath");
-        unlink(glob("$cachePath/*"));
+    if ( -d $cachePath ) {
+        $self->app->log->info( "Cleaning out old files in $cachePath" );
+        unlink( glob( "$cachePath/*" ) );
     } else {
         mkdir $cachePath;
     }
@@ -74,7 +75,8 @@ sub startup ( $self ) {
         ->name( 'playlists_remove_from_current' );
     $r->post( '/playlists/current/clear' )->to( 'playlists#clear_current' )
         ->name( 'playlists_clear_current' );
-    $r->get('/playlists/random')->to('playlists#random')->name('playlists_random');
+    $r->get( '/playlists/random' )->to( 'playlists#random' )
+        ->name( 'playlists_random' );
     $r->get( "/player" )->to( 'players#index' )->name( 'players_index' );
 
     if ( $config->{ mp3BaseDirectory } ) {
@@ -89,8 +91,15 @@ sub startup ( $self ) {
         $self->catalog( $cat );
         $self->app->log->info(
             "Scanning mp3 directory: " . $self->catalog->mp3BaseDirectory );
+        my $start = time();
         $self->catalog->find_songs;
-        $self->app->log->info( "Done." );
+        $self->app->log->info(
+            sprintf(
+                "Scan took %d seconds; Found %d songs",
+                ( time - $start ),
+                scalar( @{ $cat->songs } )
+            )
+        );
     }
 
 }

@@ -5,3 +5,4 @@ requires 'MP3::Tag';
 requires 'Modern::Perl';    
 requires 'Mojolicious', '8.67';
 requires 'Tree::Trie';
+requires 'Test::MockModule';

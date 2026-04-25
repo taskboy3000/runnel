@@ -16,10 +16,10 @@ has mp3BaseDirectory => '.';
 has songs            => sub { [] };
 has trie             => sub { Tree::Trie->new };
 
-sub find_songs ( $self, $dir='' ) {
+sub find_songs ( $self, $dir = '' ) {
     $dir ||= $self->mp3BaseDirectory;
 
-    opendir my $dh, $dir or die( $! );
+    opendir my $dh, $dir or die( "catalog[$dir]: $!" );
 
     my @children;
     while ( my $file = readdir $dh ) {
@@ -61,7 +61,7 @@ sub find_songs ( $self, $dir='' ) {
     return $self->songs( \@sorted );
 }
 
-sub getMP3Info ( $self, $filename='' ) {
+sub getMP3Info ( $self, $filename = '' ) {
     if ( !-e $filename ) {
         $self->app->log->warn( "cannot find '$filename'" );
         return;
@@ -89,11 +89,11 @@ sub getMP3Info ( $self, $filename='' ) {
 
     # prefer on-disk ontology
     $info{ title } ||= "unknown";
-    if (!defined $info{ artist } && defined $artist) {
+    if ( !defined $info{ artist } && defined $artist ) {
         $info{ artist } = $artist;
     }
-    if (!defined $info{album} && defined $album) {
-        $info{ album }  = $album;
+    if ( !defined $info{ album } && defined $album ) {
+        $info{ album } = $album;
     }
     if ( $info{ track } eq '0/0' ) {
         if ( $filename =~ /^(\d+)/ ) {
@@ -108,17 +108,17 @@ sub getMP3Info ( $self, $filename='' ) {
     }
 
     my $mp3Info = get_mp3info( $filename );
-    if ($mp3Info->{ BITRATE }) {
+    if ( $mp3Info->{ BITRATE } ) {
         $info{ bitrate } = $mp3Info->{ BITRATE } * 1000;
     }
 
-    if ($mp3Info->{FREQUENCY}) {
-        $info{ rate }    = $mp3Info->{ FREQUENCY } * 1000;
+    if ( $mp3Info->{ FREQUENCY } ) {
+        $info{ rate } = $mp3Info->{ FREQUENCY } * 1000;
     }
 
-    $info{ mode }    = $mp3Info->{ VBR } ? 'vbr' : 'cbr';
-    $info{ size }    = $mp3Info->{ SIZE };
-    $info{ time }    = int( $mp3Info->{ SECS } // 0 );
+    $info{ mode } = $mp3Info->{ VBR } ? 'vbr' : 'cbr';
+    $info{ size } = $mp3Info->{ SIZE };
+    $info{ time } = int( $mp3Info->{ SECS } // 0 );
 
     # convert to hh::mm::ss
     my $minutes = int( $info{ time } / 60 );
@@ -208,28 +208,27 @@ sub get_songs ( $self, $type, $criterion ) {
     return \@found;
 }
 
-
-sub get_random_songs ($self, $term, $limit) {
+sub get_random_songs ( $self, $term, $limit ) {
     $limit //= 200;
 
     my $songs = [];
-    if ($term) {
-        $songs = $self->search_by_word($term);
+    if ( $term ) {
+        $songs = $self->search_by_word( $term );
     } else {
         my $listSize = @{ $self->songs };
         my %seen;
-        for (my $i=0; $i < $limit; $i++) {
-            my $idx = int(rand($listSize));
-            if (exists $seen{$idx}) {
+        for ( my $i = 0; $i < $limit; $i++ ) {
+            my $idx = int( rand( $listSize ) );
+            if ( exists $seen{ $idx } ) {
                 next;
             }
-            push @$songs, $self->songs->[$idx];
-            $seen{$idx} = 1;
+            push @$songs, $self->songs->[ $idx ];
+            $seen{ $idx } = 1;
         }
     }
 
-    if ($limit && @$songs > $limit) {
-        @$songs = @{$songs}[0 .. ($limit - 1)];
+    if ( $limit && @$songs > $limit ) {
+        @$songs = @{ $songs }[ 0 .. ( $limit - 1 ) ];
     }
 
     return $songs;

@@ -8,10 +8,15 @@
 
 ## Coding Standards
 - Use Perl best practices with Mojolicious framework
+- Perl modules 'use' statements should be sorted.  Pragma statements like 'use strict', 'use warnings', 'use experimental', 'use lib' should not be re-ordered.  Don't change the user's order of pragmas. 
 - Follow PS1 standard for Perl code formatting
 - Use explicit package declarations
 - Maintain 2 spaces per indent
 - Avoid bareword filehandles
+- Add perl module dependencies to cpanfile
+- Use cpanm --installdeps . to install module dependencies
+- Indent perl code with perltidy like `make indent`
+- can run cover like: `make cover && make report`
 
 ## Testing
 - All new features require unit tests in `t/`
