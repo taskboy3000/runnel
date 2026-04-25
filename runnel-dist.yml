@@ -1,4 +1,7 @@
 ---
 secrets:
-  - f0e2f2138cfdcb875534abd629a1cecb08b4bf91
+  - CHANGEME
 mp3BaseDirectory: ./mp3
+hypnotoad:
+  listen:
+    - http://*:8080

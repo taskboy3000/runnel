@@ -5,6 +5,7 @@
 - Author: Joe Johnston <jjohn@taskboy.com>
 - Purpose: A brain-dead MP3 streamer written in HTML5 with minimal javascript
 - License: CC BY 4.0
+- The structure of this app: ./index.md
 
 ## Coding Standards
 - Use Perl best practices with Mojolicious framework

@@ -24,7 +24,52 @@ this project, but it is not required.
 ## Thank You
 
 This project is built on the excellent MVC framework, Mojolicious (https://mojolicious.org/).
-    
+
+## Running with systemd on Linux
+
+Runnel can be run using the hypnotoad prefork server with systemd for automatic startup and process management.
+
+### Configure the listen port
+
+Edit `runnel.yml` and add a `hypnotoad` section to set the TCP listen port:
+
+```yaml
+hypnotoad:
+  listen:
+    - http://*:8080
+```
+
+### Create a systemd service unit
+
+Create `/etc/systemd/system/runnel.service`:
+
+```ini
+[Unit]
+Description=Runnel MP3 Streaming Server
+After=network.target
+
+[Service]
+Type=forking
+User=runnel
+Group=runnel
+WorkingDirectory=/path/to/runnel
+ExecStart=/path/to/runnel/script/runnel hypnotoad -f /path/to/runnel/script/runnel
+ExecStop=/path/to/runnel/script/runnel hypnotoad -s /path/to/runnel/script/runnel
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### Enable and start the service
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable runnel
+sudo systemctl start runnel
+```
+
 ## Copyright
 
 sortable:
