@@ -1,15 +1,20 @@
 clean:
-	find . -name '*.bak' -exec 'rm' '{}' ';'
+	find . -name '*.bak' -o -name '*.tdy' -exec 'rm' '{}' ';'
 	rm -rf t/cover_db;
+	rm -rf t/Service/cover_db;
 
 test:
 	prove t
+	prove t/Service
+	npm test
 
 cover:
 	rm -rf t/cover_db;
-	cd t && PERL5OPT=-MDevel::Cover prove .;
+	cd t && PERL5OPT=-MDevel::Cover prove .; 
+	cd t && PERL5OPT=-MDevel::Cover prove ./Service;
 
 report:
+	npm test -- --coverage
 	cd t && cover -summary
 
 # Configure perltidy command (install perltidy from CPAN if needed)
@@ -37,7 +42,7 @@ indent:
 	  set -e; \
 	  cat .perltidy_file_list | while IFS= read -r f; do \
 	    echo "  perltidy $$f"; \
-	    $(PERLTIDY) -b -q $$f || { echo "perltidy failed on $$f"; exit 1; }; \
+	    $(PERLTIDY) -q $$f || { echo "perltidy failed on $$f"; exit 1; }; \
 	  done; \
 	  rm -f .perltidy_file_list; \
 	fi

@@ -46,24 +46,14 @@ sub song_table ( $self ) {
 }
 
 sub search ( $self ) {
-    my $term  = $self->param( "q" );
-    my @words = split( /\s+/, $term );
-    my $found = $self->app->catalog->search( \@words );
+    my $term = $self->param( "q" );
+    my $svc  = $self->app->song_search;
+
+    my $found = $svc->search( $term );
 
     return $self->respond_to(
         html => sub {
-
-            # transform $found into catalog format
-            my $catalogFormat = [];
-            for my $info ( @$found ) {
-                push @$catalogFormat,
-                    {
-                    info => $info,
-                    name => $info->{ title },
-                    };
-            }
-
-            $self->stash( "songs" => $catalogFormat );
+            $self->stash( "songs" => $found );
             $self->render(
                 template => "songs/fragments/song_table",
                 format   => "html",

@@ -15,8 +15,8 @@
 - Avoid bareword filehandles
 - Add perl module dependencies to cpanfile
 - Use cpanm --installdeps . to install module dependencies
-- Indent perl code with perltidy like `make indent`
-- can run cover like: `make cover && make report`
+- Indent perl code with perltidy using: `make indent`
+- Get perl test coverage using: `make cover && make report`
 
 ## Testing
 - All new features require unit tests in `t/`

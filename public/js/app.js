@@ -4,15 +4,17 @@
  * Licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/legalcode)
 */
 import { Playlist } from './Playlist.js';
+import { validateSearchTerm } from './InputValidator.js';
 
 function songSearchFormHandler (event) {
     event.preventDefault();
     let term = document.getElementById('song-search').querySelector('input[name=search]').value;
-    if (term) {
+    let validated = validateSearchTerm(term);
+    if (validated) {
         let url = new URL(window.location.href);
         url.pathname = 'songs/search';
         let params = url.searchParams;
-        params.set('q', term);
+        params.set('q', validated);
         console.log("Search URL is: " + url);
         
         fetch(url)
@@ -27,6 +29,10 @@ function songSearchFormHandler (event) {
                 }
                 handleMediaAddsAsynchronously();
 
+            })
+            .catch(err => {
+                console.error("Search failed:", err);
+                showToastNotice("Search failed. Please try again.");
             });
     } else {
         return loadSongsTable();
@@ -46,6 +52,10 @@ function loadSongsTable () {
                 }
                 handleMediaAddsAsynchronously();
 
+            })
+            .catch(err => {
+                console.error("Load songs failed:", err);
+                showToastNotice("Failed to load songs. Please try again.");
             });
     }
 };
@@ -65,6 +75,10 @@ function handleMediaAddsAsynchronously() {
                     .then(response => { return response.json() })
                     .then(json => {
                         showToastNotice(json.msg);
+                    })
+                    .catch(err => {
+                        console.error("Add song failed:", err);
+                        showToastNotice("Failed to add song. Please try again.");
                     });
             });
         }
@@ -74,10 +88,16 @@ function handleMediaAddsAsynchronously() {
 function showToastNotice (msg) {
     const toast = document.getElementById("toast-notice");
 
+    if (typeof bootstrap === 'undefined' || typeof bootstrap.Toast === 'undefined') {
+        console.warn("Bootstrap Toast unavailable:", msg);
+        return;
+    }
+
     toast.querySelector(".toast-body").innerHTML = msg;
     new bootstrap.Toast(toast, {}).show();
-    
 }
+
+export { showToastNotice };
 
 
 function init() {

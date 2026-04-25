@@ -3,6 +3,7 @@ export class Template {
         this.templateNode = document.getElementById(templateNodeId); // This should be a <template> node
         if (!this.templateNode) {
             console.error("Cannot find node " + templateNodeId);
+            return;
         }
 
         if (!this.templateNode.content) {

@@ -4,10 +4,32 @@ use Mojo::Base 'Mojolicious', -signatures;
 use FindBin;
 use Runnel::Catalog;
 use Runnel::Playlist;
+use Runnel::Service::SongSearch;
+use Runnel::Service::PlaylistManager;
 
 has 'catalog';
 has 'playlist'  => sub { Runnel::Playlist->new };
 has 'cachePath' => "$FindBin::Bin/../cache";
+
+has 'song_search' => sub {
+    my $app     = shift;
+    my $catalog = $app->catalog or die "catalog not set";
+    Runnel::Service::SongSearch->new(
+        catalog => $catalog,
+        logger  => sub ( $level, $msg ) { $app->log->$level( $msg ) },
+    );
+};
+
+has 'playlist_manager' => sub {
+    my $app      = shift;
+    my $catalog  = $app->catalog  or die "catalog not set";
+    my $playlist = $app->playlist or die "playlist not set";
+    Runnel::Service::PlaylistManager->new(
+        catalog  => $catalog,
+        playlist => $playlist,
+        logger   => sub ( $level, $msg ) { $app->log->$level( $msg ) },
+    );
+};
 
 # This method will run once at server start
 sub startup ( $self ) {

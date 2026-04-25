@@ -36,130 +36,103 @@ sub playlist_table ( $self ) {
 
 sub add_to_current ( $self ) {
     my $path = $self->param( "path" );
+    my $svc  = $self->app->playlist_manager;
 
-    my $song;
-    if ( $song = $self->app->catalog->find_by_path( $path ) ) {
-        $self->app->log->info(
-            "Adding to playlist: " . $song->{ info }->{ partialPath } );
-        $self->app->playlist->add( $song );
-    } else {
-        $self->app->log->warn(
-            "Could not find a song with path: " . ( $path || "-" ) );
+    my ( $result, $error );
+    eval { $result = $svc->add_by_path( $path ); 1 }
+        or do { $error = $@ };
+
+    if ( $error ) {
+        return $self->respond_to(
+            'json' => sub {
+                $self->render( json => { success => 0, msg => $error } );
+            },
+            'html' => sub { $self->redirect_to( "playlists_show_current" ) }
+        );
     }
 
-    my $msg = sprintf( 'Added %s', $song->{ info }->{ title } );
-    $self->respond_to(
-        'json' =>
-            sub { $self->render( json => { success => 1, msg => $msg } ) },
+    return $self->respond_to(
+        'json' => sub { $self->render( json => $result ) },
         'html' => sub { $self->redirect_to( "playlists_show_current" ) }
     );
 }
 
 sub remove_from_current ( $self ) {
     my $path = $self->param( "path" );
+    my $svc  = $self->app->playlist_manager;
 
-    my $song;
-    if ( $song = $self->app->catalog->find_by_path( $path ) ) {
-        $self->app->playlist->remove( $song );
+    my ( $result, $error );
+    eval { $result = $svc->remove_by_path( $path ); 1 }
+        or do { $error = $@ };
+
+    if ( $error ) {
+        return $self->respond_to(
+            'json' => sub {
+                $self->render( json => { success => 0, msg => $error } );
+            },
+            'html' => sub { $self->redirect_to( "playlists_show_current" ) }
+        );
     }
 
-    my $msg = 'Removed song ' . $song->{ info }->{ title };
-    $self->respond_to(
-        'json' =>
-            sub { $self->render( json => { success => 1, msg => $msg } ) },
+    return $self->respond_to(
+        'json' => sub { $self->render( json => $result ) },
         'html' => sub { $self->redirect_to( "playlists_show_current" ) }
     );
 }
 
 sub clear_current ( $self ) {
-    $self->app->playlist->clear();
+    my $svc    = $self->app->playlist_manager;
+    my $result = $svc->clear_all;
 
-    $self->respond_to(
-        'json' => sub { $self->render( json => { success => 1 } ) },
-        'html' => sub {
-            $self->redirect_to( 'playlists_show_current' );
-        }
+    return $self->respond_to(
+        'json' => sub { $self->render( json => $result ) },
+        'html' => sub { $self->redirect_to( 'playlists_show_current' ) },
     );
-
 }
 
 sub add_artist ( $self ) {
-    my $name  = $self->param( "name" );
-    my $songs = $self->app->catalog->get_songs( artist => $name );
+    my $name = $self->param( "name" );
+    my $svc  = $self->app->playlist_manager;
 
-    for my $song ( @$songs ) {
-        $self->app->playlist->add( $song );
-    }
+    my $result = $svc->add_by_artist( $name );
 
-    my $msg = sprintf(
-        'Added %d song%s from artist %s',
-        scalar @$songs,
-        ( @$songs == 1 ? '' : 's' ), $name
-    );
-    $self->respond_to(
-        'json' =>
-            sub { $self->render( json => { success => 1, msg => $msg } ) },
-        'html' => sub {
-            $self->redirect_to( 'playlists_show_current' );
-        }
+    return $self->respond_to(
+        'json' => sub { $self->render( json => $result ) },
+        'html' => sub { $self->redirect_to( 'playlists_show_current' ) }
     );
 }
 
 sub add_album ( $self ) {
-    my $name  = $self->param( "name" );
-    my $songs = $self->app->catalog->get_songs( album => $name );
+    my $name = $self->param( "name" );
+    my $svc  = $self->app->playlist_manager;
 
-    for my $song ( @$songs ) {
-        $self->app->playlist->add( $song );
-    }
+    my $result = $svc->add_by_album( $name );
 
-    my $msg = sprintf(
-        'Added %d song%s from album %s',
-        scalar @$songs,
-        ( @$songs == 1 ? '' : 's' ), $name
-    );
-    $self->respond_to(
-        'json' =>
-            sub { $self->render( json => { success => 1, msg => $msg } ) },
-        'html' => sub {
-            $self->redirect_to( "playlists_show_current" );
-        }
+    return $self->respond_to(
+        'json' => sub { $self->render( json => $result ) },
+        'html' => sub { $self->redirect_to( "playlists_show_current" ) }
     );
 }
 
 sub add_genre ( $self ) {
-    my $name  = $self->param( "name" );
-    my $songs = $self->app->catalog->get_songs( genre => $name );
-    for my $song ( @$songs ) {
-        $self->app->playlist->add( $song );
-    }
+    my $name = $self->param( "name" );
+    my $svc  = $self->app->playlist_manager;
 
-    my $msg = sprintf(
-        'Added %d song%s from genre %s',
-        scalar @$songs,
-        ( @$songs == 1 ? '' : 's' ), $name
-    );
-    $self->respond_to(
-        'json' =>
-            sub { $self->render( json => { success => 1, msg => $msg } ) },
-        'html' => sub {
-            $self->redirect_to( "playlists_show_current" );
-        }
+    my $result = $svc->add_by_genre( $name );
+
+    return $self->respond_to(
+        'json' => sub { $self->render( json => $result ) },
+        'html' => sub { $self->redirect_to( "playlists_show_current" ) }
     );
 }
 
-sub random {
-    my ( $self ) = @_;
-    my $limit = $self->param( "limit" ) || 100;
+sub random ($self) {
+    my $limit    = $self->param( "limit" ) || 100;
+    my $svc      = $self->app->playlist_manager;
 
-    my $songs = $self->app->catalog->get_random_songs( '', $limit );
-    for my $song ( @$songs ) {
-        $self->app->playlist->add( $song );
-        my $msg = sprintf( 'Added %s', $song->{ info }->{ title } );
-        $self->app->log->info( $msg );
-    }
+    my $result = $svc->add_random( $limit );
 
-    $self->respond_to(
+    return $self->respond_to(
         'html' => sub { $self->redirect_to( "playlists_show_current" ) } );
 }
 
