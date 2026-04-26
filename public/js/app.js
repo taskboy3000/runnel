@@ -75,6 +75,7 @@ function handleMediaAddsAsynchronously() {
                     .then(response => { return response.json() })
                     .then(json => {
                         showToastNotice(json.msg);
+                        updatePlaylistCount();
                     })
                     .catch(err => {
                         console.error("Add song failed:", err);
@@ -83,6 +84,20 @@ function handleMediaAddsAsynchronously() {
             });
         }
     }
+}
+
+async function updatePlaylistCount() {
+    let url = '/playlists/current';
+    await fetch(url, {
+        headers: {'Accept': 'application/json'}
+    })
+        .then((response) => { return response.json() })
+        .then((json) => {
+            let badge = document.getElementById('playlist-count');
+            if (badge) {
+                badge.textContent = json.length;
+            }
+        });
 }
 
 function showToastNotice (msg) {
@@ -107,6 +122,7 @@ function init() {
 
     if (document.querySelector('.content.controller.songs')) {
         loadSongsTable();
+        updatePlaylistCount();
     }
 
     if (document.querySelector('.content.controller.playlists')) {

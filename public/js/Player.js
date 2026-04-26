@@ -64,7 +64,17 @@ export class Player {
             },
         })
             .then((response) => { return response.json() })
-            .then((json) => { this.playlist = json});
+            .then((json) => { 
+                this.playlist = json;
+                this.updatePlaylistBadge();
+            });
+    }
+
+    updatePlaylistBadge() {
+        let badge = document.getElementById('playlist-count');
+        if (badge) {
+            badge.textContent = this.playlist.length;
+        }
     }
 
     handlePlaylistShuffle () {

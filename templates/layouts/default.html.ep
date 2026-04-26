@@ -19,7 +19,7 @@
 	      <a class="nav-link text-light <%= $c->short_name =~ /songs$/ ? 'active' : '' %>" href="<%= url_for("songs_index") %>">Songs</a>
         </li>
         <li class="nav-item">
-	      <a class="nav-link text-light <%= $c->short_name =~ /playlists$/ ? 'active' : '' %>" href="<%= url_for("playlists_show_current") %>">Current Playlist</a>
+	      <a class="nav-link text-light <%= $c->short_name =~ /playlists$/ ? 'active' : '' %>" href="<%= url_for("playlists_show_current") %>">Current Playlist <span class="badge bg-warning" id="playlist-count">-</span></a>
         </li>
         <li class="nav-item">
           <a class="nav-link text-light" href="<%= url_for("playlists_random")->query("limit" => 100) %>">

@@ -89,6 +89,7 @@ export class Playlist {
         tbody.innerHTML = '';
         tbody.appendChild(newTableBody);
         this.player.setCurrentSong(this.player.currentPlaylistIdx);
+        this.player.updatePlaylistBadge();
         this.handleMediaPlaylistRemoveAsynchronously();
         this.handleMediaPlaylistSetAsCurrent();
 
