@@ -8,6 +8,9 @@
 - The structure of this app: ./index.md
 
 ## Coding Standards
+- Always make a plan.md before working on implementation
+- Each step in a plan should be small and not break the build
+- Always ask the user to approve of each change when a step is completed
 - Use Perl best practices with Mojolicious framework
 - Perl modules 'use' statements should be sorted.  Pragma statements like 'use strict', 'use warnings', 'use experimental', 'use lib' should not be re-ordered.  Don't change the user's order of pragmas. 
 - Follow PS1 standard for Perl code formatting
