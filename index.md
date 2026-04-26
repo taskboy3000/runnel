@@ -36,7 +36,6 @@
 - `README.md`: Project overview
 - `LICENCE.txt`: License information
 - `plan.md`: Development roadmap
-- `architectural_concerns.md`: Technical design notes
 
 ## 5. Configuration
 - `runnel-dist.yml`: Distribution configuration

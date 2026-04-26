@@ -42,8 +42,11 @@
 - Use `read` for file inspection
 - Use `edit` for precise changes
 - Use `bash` for system commands
+- Run `perl -Ilib -wc <file>` to check Perl syntax
+- Run `perlcritic file.pl` to get opinions about coding style on .pl and .pm files
 
 ## Workflow
-1. Edit files using `edit` tool
-2. Verify changes with `read` tool
-3. Run tests with `script/runnel test`
+1. Read index.md to understand the project structure and file locations before implementing any plan
+2. Edit files using `edit` tool
+3. Verify changes with `read` tool
+4. Run tests with `script/runnel test`

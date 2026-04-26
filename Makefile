@@ -1,7 +1,5 @@
 clean:
-	find . -name '*.bak' -o -name '*.tdy' -exec 'rm' '{}' ';'
-	rm -rf t/cover_db;
-	rm -rf t/Service/cover_db;
+	rm -rf t/cover_db coverage t/Service/cover_db
 
 test:
 	prove t
@@ -46,3 +44,4 @@ indent:
 	  done; \
 	  rm -f .perltidy_file_list; \
 	fi
+	find . -name '*.bak' -o -name '*.tdy' -exec 'rm' '{}' ';'

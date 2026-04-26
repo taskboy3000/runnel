@@ -2,3 +2,5 @@
 runnel.yml
 plan.md
 t/cover_db
+package-lock.json
+node_modules
