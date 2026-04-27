@@ -40,10 +40,17 @@
 ## Tools
 - Use `grep` for code searches
 - Use `read` for file inspection
-- Use `edit` for precise changes
+- Use `edit` for tool use
 - Use `bash` for system commands
 - Run `perl -Ilib -wc <file>` to check Perl syntax
 - Run `perlcritic file.pl` to get opinions about coding style on .pl and .pm files
+
+## Perl Best Practices for File I/O
+- Use lexical filehandles: `open(my $fh, '>', $file)` not `open(FH, '>', $file)`
+- Always use `or die "$file: $!"` for open failures (note `$!` not `$1`)
+- Use File::Temp for tests: `File::Temp->new(UNLINK => 0, SUFFIX => '.json')` to get temp file path
+- Slurp file with lexical handle: use `local $/ = undef` block
+- Return perl idiomatic boolean types: prefer `return 1` for success and `return` for failure; Avoid returning `undef`
 
 ## Workflow
 1. Read index.md to understand the project structure and file locations before implementing any plan

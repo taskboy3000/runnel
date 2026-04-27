@@ -4,9 +4,9 @@ use warnings;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 
-use Test::More;
-
+use File::Temp;
 use Runnel::Catalog;
+use Test::More;
 
 my $testDir    = "$FindBin::Bin";
 my $catalogDir = "$testDir/fake_catalog";
@@ -270,6 +270,45 @@ sub test_get_random_songs_term_no_match {
         0, "get_random_songs returns empty for non-matching term" );
 }
 
+
+sub test_save_and_load {
+    my $C = Runnel::Catalog->new->find_songs( $catalogDir );
+
+    my $initialSongs = scalar( @{ $C->songs } );
+    ok( $initialSongs > 0, "catalog has songs before save" );
+
+    $C->manifest( { '/fake_catalog/test.mp3' => 1234567890 } );
+    my $initialManifest = $C->manifest;
+    ok( keys %$initialManifest > 0, "manifest has entries before save" );
+
+    my $temp = File::Temp->new( UNLINK => 0, SUFFIX => '.json' );
+    my $cacheFile = $temp->filename;
+
+    my $saved = $C->save( $cacheFile );
+    ok( $saved, "save returns true" );
+    ok( -e $cacheFile, "save creates cache file" );
+
+    my $loadedCatalog = Runnel::Catalog->new;
+    my $loaded = $loadedCatalog->load( $cacheFile );
+    ok( $loaded, "load returns true" );
+
+    my $loadedSongs = scalar( @{ $loadedCatalog->songs } );
+    is( $loadedSongs, $initialSongs, "load restores correct number of songs" );
+
+    my $loadedManifest = $loadedCatalog->manifest;
+    ok( defined $loadedManifest && ref $loadedManifest eq 'HASH',
+        "load restores manifest as hash" );
+    is( $loadedManifest->{'/fake_catalog/test.mp3'},
+        1234567890, "load restores manifest entries correctly" );
+}
+
+sub test_load_missing_file {
+    my $C = Runnel::Catalog->new;
+
+    my $result = $C->load( '/nonexistent/path/catalog.json' );
+    ok( !$result, "load returns 0 for missing file" );
+}
+
 test_find_by_path();
 test_search_by_word();
 test_get_songs();
@@ -288,5 +327,7 @@ test_get_random_songs_without_term();
 test_get_random_songs_default_limit();
 test_get_random_songs_duplicates();
 test_get_random_songs_term_no_match();
+test_save_and_load();
+test_load_missing_file();
 
 done_testing();

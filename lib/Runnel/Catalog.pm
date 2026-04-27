@@ -6,6 +6,7 @@ use experimental 'signatures';
 
 use Cwd 'abs_path';
 use Encode;
+use File::Spec::Functions;
 use JSON;
 use MP3::Info;
 use MP3::Tag;
@@ -15,6 +16,13 @@ has 'app';
 has mp3BaseDirectory => '.';
 has songs            => sub { [] };
 has trie             => sub { Tree::Trie->new };
+has manifest         => sub { {} };
+
+
+sub catalog_cache_file ($self) {
+  die('assert - no cachePath') if !($self->app && $self->app->cachePath);  
+  return catfile($self->app->cachePath, 'catalog.json');
+}
 
 sub find_songs ( $self, $dir = '' ) {
     $dir ||= $self->mp3BaseDirectory;
@@ -232,6 +240,60 @@ sub get_random_songs ( $self, $term, $limit ) {
     }
 
     return $songs;
+}
+
+sub save ( $self, $cacheFile = undef ) {
+    $cacheFile //= $self->catalog_cache_file;
+
+    my $data = {
+        'songs'    => $self->{songs},
+        'manifest' => $self->{manifest},
+    };
+
+    my $temp_file = $cacheFile . "-$$.tmp";
+    my $json_content = JSON->new->pretty( 1 )->encode( $data );
+
+    open(my $cacheFH, '>:encoding(UTF-8)', $temp_file) or die("$temp_file: $!");
+    print $cacheFH $json_content;
+    close $cacheFH;
+
+    rename( $temp_file, $cacheFile )
+        or die "Cannot rename $temp_file to $cacheFile: $!";
+
+    return 1;
+}
+
+sub load ( $self, $cacheFile = undef ) {
+    $cacheFile //= $self->catalog_cache_file;
+
+    return 0 unless -e $cacheFile;
+
+    open(my $cacheFH, '<:encoding(UTF-8)', $cacheFile) or die("$cacheFile: $!");
+    my $json_content;
+    {
+        local $/ = undef;
+        $json_content = <$cacheFH>;
+    }
+    close $cacheFH;
+
+    if (!$json_content) {
+        return;
+    }
+
+    my $data = JSON->new->decode( $json_content );
+
+    $self->{songs}    = $data->{songs};
+    $self->{manifest} = $data->{manifest} || {};
+
+    $self->{trie} = Tree::Trie->new;
+    for my $song ( @{ $self->{songs} } ) {
+        my $path = $song->{info}{partialPath}
+            || $song->{info}{fullPath}
+            || next;
+        $self->{trie}->add( $path );
+    }
+
+    return 1;
 }
 
 1;
