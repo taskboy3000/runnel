@@ -16,7 +16,8 @@ my $catalog;
     my $C = Runnel::Catalog->new();
 
     diag( "Looking at catalog in $catalogDir" );
-    $catalog = $C->find_songs( $catalogDir );
+    my $changed = $C->find_songs( $catalogDir );
+    $catalog = $C;
     if ( defined $catalog ) {
         ok( @{ $catalog->songs } > 0, "Found songs" );
     } else {
@@ -32,8 +33,8 @@ my $catalog;
     if ( !-d $emptyDir ) {
         die "assert - '$emptyDir' directory is not present.  Create it";
     }
-    my $emptyCatalog = $C->find_songs( $emptyDir );
-    ok( $emptyCatalog && @{ $emptyCatalog->songs } == 0,
+    $C->find_songs( $emptyDir );
+    ok( @{ $C->songs } == 0,
         "find_songs returns an empty catalog for an empty directory"
     );
 }
@@ -60,7 +61,8 @@ my $catalog;
 }
 
 sub test_find_by_path {
-    my $C           = Runnel::Catalog->new()->find_songs( $catalogDir );
+    my $C           = Runnel::Catalog->new();
+    $C->find_songs( $catalogDir );
     my $catalogSize = scalar( @{ $C->songs } );
     my $expectedCatalogSize = 4;
 
@@ -79,7 +81,8 @@ sub test_find_by_path {
 }
 
 sub test_search_by_word {
-    my $C = Runnel::Catalog->new->find_songs( $catalogDir );
+    my $C = Runnel::Catalog->new;
+    $C->find_songs( $catalogDir );
 
     my $results = $C->search_by_word( 'Artist' );
     if ( $results ) {
@@ -90,7 +93,8 @@ sub test_search_by_word {
 }
 
 sub test_get_songs {
-    my $C = Runnel::Catalog->new->find_songs( $catalogDir );
+    my $C = Runnel::Catalog->new;
+    $C->find_songs( $catalogDir );
 
     my $results = $C->get_songs( 'title', 'A Song' );
     if ( $results ) {
@@ -101,7 +105,8 @@ sub test_get_songs {
 }
 
 sub test_trie_lookup {
-    my $C = Runnel::Catalog->new->find_songs( $catalogDir );
+    my $C = Runnel::Catalog->new;
+    $C->find_songs( $catalogDir );
 
     my $results = $C->search_by_word( 'Song' );
     ok( scalar( @$results ) > 0,
@@ -116,18 +121,114 @@ sub test_trie_persistence {
 
     $C->find_songs( $catalogDir );
     my $firstSongs = scalar( @{ $C->songs } );
-    $C->songs( [] );
-    $C->find_songs( $catalogDir );
-    my $secondSongs = scalar( @{ $C->songs } );
 
+    # Second call should detect no changes
+    my $changed = $C->find_songs( $catalogDir );
+    ok( !$changed,
+        "find_songs returns false on second call with no changes" );
+
+    my $secondSongs = scalar( @{ $C->songs } );
     ok( $firstSongs == $secondSongs,
-        "trie persists across multiple find_songs calls" );
+        "song count remains consistent across calls" );
 
     my $results1 = $C->search_by_word( 'Artist' );
     my $results2 = $C->search_by_word( 'Artist' );
 
     ok( scalar( @$results1 ) == scalar( @$results2 ),
         "trie data remains consistent" );
+}
+
+sub test_find_songs_returns_boolean {
+    my $C = Runnel::Catalog->new;
+    my $result = $C->find_songs( $catalogDir );
+    ok( defined $result && $result =~ /^[01]$/,
+        "find_songs returns a boolean value" );
+}
+
+sub test_find_songs_no_changes_detected {
+    my $C = Runnel::Catalog->new;
+    $C->find_songs( $catalogDir );
+
+    # Call again without any filesystem changes
+    my $changed = $C->find_songs( $catalogDir );
+    ok( !$changed,
+        "find_songs returns false when no files changed" );
+}
+
+sub test_find_songs_detects_new_file {
+    my $C = Runnel::Catalog->new;
+    $C->find_songs( $catalogDir );
+    my $initialCount = scalar( @{ $C->songs } );
+
+    # Create a new MP3 file
+    my $newFile = "$catalogDir/new_song.mp3";
+    if ( -e $newFile ) {
+        unlink $newFile;
+    }
+    # Copy an existing file as our "new" file
+    use File::Copy;
+    copy( "$catalogDir/test.mp3", $newFile )
+        or die "Cannot copy test.mp3: $!";
+    # Make sure mtime is different
+    utime( time(), time() + 1, $newFile );
+
+    my $changed = $C->find_songs( $catalogDir );
+    ok( $changed,
+        "find_songs returns true when new file detected" );
+
+    # Refresh catalog
+    $C = Runnel::Catalog->new;
+    $C->find_songs( $catalogDir );
+    my $newCount = scalar( @{ $C->songs } );
+    ok( $newCount > $initialCount,
+        "new file appears in songs array" );
+
+    # Cleanup
+    unlink $newFile if -e $newFile;
+}
+
+sub test_find_songs_detects_deleted_file {
+    my $C = Runnel::Catalog->new;
+    $C->find_songs( $catalogDir );
+    my $initialCount = scalar( @{ $C->songs } );
+
+    # Remove a file
+    my $fileToRemove = "$catalogDir/test.mp3";
+    my $backupFile = "$catalogDir/test.mp3.bak";
+    rename( $fileToRemove, $backupFile )
+        or die "Cannot rename file: $!";
+
+    my $changed = $C->find_songs( $catalogDir );
+    ok( $changed,
+        "find_songs returns true when file deleted" );
+
+    # Refresh catalog
+    $C = Runnel::Catalog->new;
+    $C->find_songs( $catalogDir );
+    my $newCount = scalar( @{ $C->songs } );
+    ok( $newCount < $initialCount,
+        "deleted file removed from songs array" );
+
+    # Restore file
+    rename( $backupFile, $fileToRemove )
+        or die "Cannot restore file: $!";
+}
+
+sub test_find_songs_detects_changed_file {
+    my $C = Runnel::Catalog->new;
+    $C->find_songs( $catalogDir );
+
+    # Touch a file to change its mtime
+    my $fileToChange = "$catalogDir/test.mp3";
+    my $oldMtime = (stat $fileToChange)[9];
+    utime( time(), time() + 2, $fileToChange );
+
+    my $changed = $C->find_songs( $catalogDir );
+    ok( $changed,
+        "find_songs returns true when file changed" );
+
+    # Restore mtime
+    utime( time(), $oldMtime, $fileToChange );
 }
 
 sub test_metadata_missing_fields {
@@ -143,7 +244,8 @@ sub test_metadata_missing_fields {
 }
 
 sub test_track_number_parsing {
-    my $C = Runnel::Catalog->new->find_songs( $catalogDir );
+    my $C = Runnel::Catalog->new;
+    $C->find_songs( $catalogDir );
 
     my $song = $C->find_by_path( "$testDir/fake_catalog/test.mp3" );
     ok( defined $song->{ info }->{ track }, "track number is defined" );
@@ -153,7 +255,8 @@ sub test_track_number_parsing {
 }
 
 sub test_sort_order {
-    my $C = Runnel::Catalog->new->find_songs( $catalogDir );
+    my $C = Runnel::Catalog->new;
+    $C->find_songs( $catalogDir );
 
     my @songs = @{ $C->songs };
     return ok( 1, "sort order check - sufficient songs for test" )
@@ -180,7 +283,8 @@ sub test_sort_order {
 }
 
 sub test_search_method {
-    my $C = Runnel::Catalog->new->find_songs( $catalogDir );
+    my $C = Runnel::Catalog->new;
+    $C->find_songs( $catalogDir );
 
     my $results = $C->search( [ 'A', 'Song' ] );
     ok( defined $results && ref $results eq 'ARRAY',
@@ -193,14 +297,16 @@ sub test_search_method {
 }
 
 sub test_search_single_word {
-    my $C = Runnel::Catalog->new->find_songs( $catalogDir );
+    my $C = Runnel::Catalog->new;
+    $C->find_songs( $catalogDir );
 
     my $results = $C->search( [ 'Artist' ] );
     ok( scalar( @$results ) >= 0, "search with single word returns results" );
 }
 
 sub test_search_and_logic {
-    my $C = Runnel::Catalog->new->find_songs( $catalogDir );
+    my $C = Runnel::Catalog->new;
+    $C->find_songs( $catalogDir );
 
     my $results = $C->search( [ 'A', 'Song' ] );
     ok( defined $results && ref $results eq 'ARRAY',
@@ -212,7 +318,8 @@ sub test_search_and_logic {
 }
 
 sub test_search_empty_results {
-    my $C = Runnel::Catalog->new->find_songs( $catalogDir );
+    my $C = Runnel::Catalog->new;
+    $C->find_songs( $catalogDir );
 
     my $results = $C->search( [ 'NonExistentWord12345' ] );
     is( scalar( @$results ),
@@ -220,14 +327,16 @@ sub test_search_empty_results {
 }
 
 sub test_search_multiple_words_all_match {
-    my $C = Runnel::Catalog->new->find_songs( $catalogDir );
+    my $C = Runnel::Catalog->new;
+    $C->find_songs( $catalogDir );
 
     my $results = $C->search( [ 'Best', 'Artist' ] );
     ok( scalar( @$results ) >= 0, "search with multiple matching words" );
 }
 
 sub test_get_random_songs_with_term {
-    my $C = Runnel::Catalog->new->find_songs( $catalogDir );
+    my $C = Runnel::Catalog->new;
+    $C->find_songs( $catalogDir );
 
     my $results = $C->get_random_songs( 'Artist', 10 );
     ok( defined $results && ref $results eq 'ARRAY',
@@ -236,7 +345,8 @@ sub test_get_random_songs_with_term {
 }
 
 sub test_get_random_songs_without_term {
-    my $C = Runnel::Catalog->new->find_songs( $catalogDir );
+    my $C = Runnel::Catalog->new;
+    $C->find_songs( $catalogDir );
 
     my $results = $C->get_random_songs( undef, 5 );
     ok( defined $results && ref $results eq 'ARRAY',
@@ -246,14 +356,16 @@ sub test_get_random_songs_without_term {
 }
 
 sub test_get_random_songs_default_limit {
-    my $C = Runnel::Catalog->new->find_songs( $catalogDir );
+    my $C = Runnel::Catalog->new;
+    $C->find_songs( $catalogDir );
 
     my $results = $C->get_random_songs( '', 10 );
     ok( defined $results, "get_random_songs without term returns results" );
 }
 
 sub test_get_random_songs_duplicates {
-    my $C = Runnel::Catalog->new->find_songs( $catalogDir );
+    my $C = Runnel::Catalog->new;
+    $C->find_songs( $catalogDir );
 
     my $results = $C->get_random_songs( undef, 100 );
     ok( defined $results, "get_random_songs with high limit succeeds" );
@@ -261,7 +373,8 @@ sub test_get_random_songs_duplicates {
 }
 
 sub test_get_random_songs_term_no_match {
-    my $C = Runnel::Catalog->new->find_songs( $catalogDir );
+    my $C = Runnel::Catalog->new;
+    $C->find_songs( $catalogDir );
 
     my $results = $C->get_random_songs( 'NonExistentWord12345', 5 );
     ok( defined $results,
@@ -272,7 +385,8 @@ sub test_get_random_songs_term_no_match {
 
 
 sub test_save_and_load {
-    my $C = Runnel::Catalog->new->find_songs( $catalogDir );
+    my $C = Runnel::Catalog->new;
+    $C->find_songs( $catalogDir );
 
     my $initialSongs = scalar( @{ $C->songs } );
     ok( $initialSongs > 0, "catalog has songs before save" );
@@ -329,5 +443,10 @@ test_get_random_songs_duplicates();
 test_get_random_songs_term_no_match();
 test_save_and_load();
 test_load_missing_file();
+test_find_songs_returns_boolean();
+test_find_songs_no_changes_detected();
+test_find_songs_detects_new_file();
+test_find_songs_detects_deleted_file();
+test_find_songs_detects_changed_file();
 
 done_testing();

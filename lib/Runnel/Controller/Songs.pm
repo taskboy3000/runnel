@@ -14,33 +14,11 @@ sub song_table ( $self ) {
     $self->stash( "songs" => $self->app->catalog->songs );
     $self->respond_to(
         html => sub {
-            my $path =
-                Mojo::File->new( $self->app->cachePath . "/song_table.html" );
-            if ( -e $path ) {
-                $self->app->log->info(
-                    "Using cached song table from: " . $path );
-                $self->reply->file( $path );
-                return;
-            }
-            my $html = $self->render_to_string(
+            return $self->render(
                 template => "songs/fragments/song_table",
                 format   => "html",
                 handler  => "ep",
             );
-
-            if ( -w dirname( $path ) ) {
-                write_file( $path, { binmode => ':utf8' }, $html );
-                $self->app->log->info(
-                    "Caching complete song table to $path" );
-            } else {
-                $self->app->log->warn(
-                    "Cache dir for $path is not writeable" );
-                return $self->render( text => $self->app->cachePath
-                        . "/ is not writable.  Please chmod 0755 "
-                        . $self->app->cachePath );
-            }
-            $self->reply->static( "song_table.html" );
-            return;
         },
     );
 }

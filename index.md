@@ -1,73 +1,94 @@
 # Project Structure
 
-## 1. Git Metadata
-- `.git/`: Git repository metadata
-  - `config`, `description`, `HEAD`: Git configuration files
-  - `objects/`: Stored Git objects
-  - `refs/`: Reference pointers to commits
+## Overview
+A brain-dead MP3 streamer using HTML5, Perl (Mojolicious), and minimal JavaScript.
 
-## 2. Application Code
-- `lib/`: Perl modules
-  - `Runnel.pm`: Main application module
-  - `Controller/`: Request handlers
-    - `Players.pm`, `Playlists.pm`, `Songs.pm`
-  - `Catalog.pm`: Catalog functionality
-  - `Playlist.pm`: Playlist entity
-  - `Service/`: Business logic services
-    - `SongSearch.pm`: Song search service
-    - `PlaylistManager.pm`: Playlist management service
-- `script/runnel`: Application entry point
-- `public/`: Static assets
-  - `css/`: Stylesheets
-  - `js/`: JavaScript files
-    - `Player.js`: Audio playback
-    - `Playlist.js`: Playlist management
-    - `Template.js`: Template rendering
-    - `InputValidator.js`: Input validation
-    - `app.js`: Application entry
-  - `index.html`: Main HTML file
+## File Map
 
-## 3. Templates
-- `templates/`: HTML templates
-  - `layouts/`: Shared layouts
-  - `songs/`, `playlists/`, `players/`: Content-specific templates
+### Perl Modules (`lib/`)
+| File | Purpose |
+|------|---------|
+| `lib/Runnel.pm` | Main Mojolicious app: routes, helpers (`catalog`, `playlist`, `song_search`, `playlist_manager`) |
+| `lib/Runnel/Controller.pm` | Base controller with `short_name` helper |
+| `lib/Runnel/Controller/Players.pm` | Player state endpoints (current song, play/pause) |
+| `lib/Runnel/Controller/Playlists.pm` | Playlist CRUD endpoints |
+| `lib/Runnel/Controller/Songs.pm` | Song browse and search endpoints |
+| `lib/Runnel/Catalog.pm` | MP3 scanning, catalog caching, song/artist indexing (Tree::Trie) |
+| `lib/Runnel/Playlist.pm` | Current playback queue and state model |
+| `lib/Runnel/Service/SongSearch.pm` | Full-text song search using Trie |
+| `lib/Runnel/Service/PlaylistManager.pm` | Playlist CRUD operations service |
+| `lib/Runnel/Command.pm` | Base class for custom Mojolicious commands |
+| `lib/Runnel/Command/scan.pm` | CLI command: `script/runnel scan` to index MP3 files |
 
-## 4. Documentation
-- `README.md`: Project overview
-- `LICENCE.txt`: License information
-- `plan.md`: Development roadmap
+### Templates (`templates/`)
+| File | Purpose |
+|------|---------|
+| `templates/layouts/default.html.ep` | Base HTML layout with navbar |
+| `templates/songs/index.html.ep` | Song browse UI |
+| `templates/songs/fragments/song_table.html.ep` | Song table partial (AJAX) |
+| `templates/playlists/show_current.html.ep` | Current playlist display |
+| `templates/playlists/fragments/playlist_table.html.ep` | Playlist table partial (AJAX) |
+| `templates/players/index.html.ep` | Player controls UI |
 
-## 5. Configuration
-- `runnel-dist.yml`: Distribution configuration
-- `cpanfile`: Perl dependency list
-- `package.json`: Node.js configuration
-- `babel.config.js`: Babel transpilation config
-- `t/jest.config.js`: Jest test configuration
+### Static Assets (`public/`)
+| File | Purpose |
+|------|---------|
+| `public/index.html` | Main SPA entry point |
+| `public/js/app.js` | App init, routing, event binding |
+| `public/js/Player.js` | HTML5 Audio API playback controller |
+| `public/js/Playlist.js` | Playlist management, Sortable.js integration |
+| `public/js/Template.js` | Client-side template rendering |
+| `public/js/InputValidator.js` | Form input validation |
+| `public/js/contrib/sortable.min.js` | SortableJS drag-and-drop library |
+| `public/css/app.css` | Custom styles |
+| `public/css/contrib/sortable.min.css` | Sortable.js styles |
 
-## 6. Technology Stack
-- **Backend**: Perl (Mojolicious framework, CPAN dependencies)
-- **Frontend**: HTML, CSS, JavaScript (with Sortable.js library)
-- **Version Control**: Git
-- **Testing**: Perl test scripts (`basic.t`), Jest for JavaScript
-- **Workspace**: VS Code configuration (`Runnel.code-workspace`)
+### JavaScript Tests (`public/js/t/`)
+| File | Purpose |
+|------|---------|
+| `public/js/t/app.test.js` | Jest tests for app.js |
+| `public/js/t/Player.test.js` | Jest tests for Player.js |
+| `public/js/t/Playlist.test.js` | Jest tests for Playlist.js |
+| `public/js/t/Template.test.js` | Jest tests for Template.js |
 
-## 7. Development
-- `.gitignore`: File exclusion patterns
-- `basic.t`: Test script
-- `plan.md`: An empheral document that covers the plan for the current development task
+### Perl Tests (`t/`)
+| File | Purpose |
+|------|---------|
+| `t/basic.t` | Integration tests |
+| `t/Catalog.t` | Runnel::Catalog unit tests |
+| `t/Playlist.t` | Runnel::Playlist unit tests |
+| `t/Service/SongSearch.t` | SongSearch service tests |
+| `t/Service/PlaylistManager.t` | PlaylistManager service tests |
 
-## 8. Testing
-### Perl Tests
-- `t/basic.t`: Integration tests for main app
-- `t/Catalog.t`: Unit tests for Runnel::Catalog
-- `t/Playlist.t`: Unit tests for Runnel::Playlist
-- `t/Service/SongSearch.t`: Unit tests for song search service
-- `t/Service/PlaylistManager.t`: Unit tests for playlist manager
-- `t/fake_catalog/`: Test data with fake mp3 files
-- `t/runnel-test.yml`: Test configuration
+### Test Support
+| File | Purpose |
+|------|---------|
+| `t/runnel-test.yml` | Test config (points to fake catalog) |
+| `t/babel.config.js` | Babel config for JS test transpilation |
+| `t/jest.config.js` | Jest configuration |
+| `t/fake_catalog/test.mp3` | Fake MP3 test fixture |
+| `t/fake_catalog/test1.mp3` | Fake MP3 test fixture |
+| `t/fake_catalog/test2.mp3` | Fake MP3 test fixture |
+| `t/fake_catalog/test3.mp3` | Fake MP3 test fixture |
 
-### JavaScript Tests
-- `public/js/t/*.test.js`: Jest test files for JavaScript modules
-- `t/jest.config.js`: Jest configuration
-- `t/babel.config.js`: Babel configuration for ES modules
-- Run with `npm test` (Jest) or `script/runnel test` (Perl)
+### Configuration (Root)
+| File | Purpose |
+|------|---------|
+| `runnel.yml` | Main config: music dir, port, etc. |
+| `runnel-dist.yml` | Production/deployment config |
+| `cpanfile` | Perl dependencies |
+| `package.json` | Node dependencies (Jest, Babel, Sortable) |
+| `package-lock.json` | Locked Node dependency versions |
+| `Makefile` | Build targets: test, cover, report, indent, critic |
+| `script/runnel` | CLI entry point for Mojolicious commands |
+| `cache/catalog.json` | Cached MP3 catalog with metadata |
+
+### Other Root Files
+| File | Purpose |
+|------|---------|
+| `AGENTS.md` | AI agent guidelines and coding standards |
+| `README.md` | Project overview and usage |
+| `LICENCE.txt` | CC BY 4.0 license |
+| `DO_NOT_PUSH` | Warning: do not push to remote |
+| `Runnel.code-workspace` | VSCode workspace config |
+| `.gitignore` | Git ignore rules |

@@ -6,7 +6,7 @@
 import { Playlist } from './Playlist.js';
 import { validateSearchTerm } from './InputValidator.js';
 
-function songSearchFormHandler (event) {
+export function songSearchFormHandler (event) {
     event.preventDefault();
     let term = document.getElementById('song-search').querySelector('input[name=search]').value;
     let validated = validateSearchTerm(term);
@@ -39,7 +39,7 @@ function songSearchFormHandler (event) {
     }
 }
 
-function loadSongsTable () {
+export function loadSongsTable () {
     let body = document.querySelector("section.songs div.card-body");
     if (body) {
         fetch('/songs/songs_table')
@@ -61,7 +61,7 @@ function loadSongsTable () {
 };
 
 
-function handleMediaAddsAsynchronously() {
+export function handleMediaAddsAsynchronously() {
     let anchors = document.querySelectorAll("section.songs table#song-list tbody a");
     if (anchors) {
         for (let anchor of anchors) {
@@ -86,7 +86,7 @@ function handleMediaAddsAsynchronously() {
     }
 }
 
-async function updatePlaylistCount() {
+export async function updatePlaylistCount() {
     let url = '/playlists/current';
     await fetch(url, {
         headers: {'Accept': 'application/json'}
@@ -103,6 +103,11 @@ async function updatePlaylistCount() {
 function showToastNotice (msg) {
     const toast = document.getElementById("toast-notice");
 
+    if (!toast) {
+        console.warn("Toast element not found:", msg);
+        return;
+    }
+
     if (typeof bootstrap === 'undefined' || typeof bootstrap.Toast === 'undefined') {
         console.warn("Bootstrap Toast unavailable:", msg);
         return;
@@ -115,7 +120,7 @@ function showToastNotice (msg) {
 export { showToastNotice };
 
 
-function init() {
+export function init() {
     if (!window.Runnel) {
         window.Runnel = {};
     }

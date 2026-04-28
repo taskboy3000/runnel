@@ -1,15 +1,15 @@
 package Runnel;
 use Mojo::Base 'Mojolicious', -signatures;
 
-use FindBin;
 use Runnel::Catalog;
+use Runnel::Command::scan;
 use Runnel::Playlist;
 use Runnel::Service::SongSearch;
 use Runnel::Service::PlaylistManager;
 
 has 'catalog';
 has 'playlist'  => sub { Runnel::Playlist->new };
-has 'cachePath' => "$FindBin::Bin/../cache";
+has 'cachePath' => sub { shift->home->child('cache') };
 
 has 'song_search' => sub {
     my $app     = shift;
@@ -33,20 +33,18 @@ has 'playlist_manager' => sub {
 
 # This method will run once at server start
 sub startup ( $self ) {
+    push @{$self->commands->namespaces}, 'Runnel::Command';
 
     # Load configuration from config file
-    my $config_file = $ENV{ 'RUNNEL_YML' } || "$FindBin::Bin/../runnel.yml";
+    my $config_file = $ENV{ 'RUNNEL_YML' } || $self->home->child('runnel.yml');
     my $config = $self->plugin( 'NotYAMLConfig', { file => $config_file } );
 
     # Configure the application
     $self->secrets( $config->{ secrets } );
     $self->renderer->cache->max_keys( 0 );
 
-    my $cachePath = "$FindBin::Bin/../cache";
-    if ( -d $cachePath ) {
-        $self->app->log->info( "Cleaning out old files in $cachePath" );
-        unlink( glob( "$cachePath/*" ) );
-    } else {
+    my $cachePath = $self->cachePath;
+    if (! -d $cachePath ) {
         mkdir $cachePath;
     }
 
@@ -56,23 +54,19 @@ sub startup ( $self ) {
 
     # Router
     my $r = $self->routes;
-
-    # Normal route to controller
-    $r->get( '/' )->to( 'songs#index' )->name( "songs_index" );
+    if ( $config->{ mp3BaseDirectory } ) {
+        my $cat = Runnel::Catalog->new(
+            mp3BaseDirectory => $config->{ mp3BaseDirectory },
+            app              => $self
+        );
+        $self->catalog( $cat );
+    }
 
     # Static mp3 files from user-specified directory
     push @{ $self->static->paths }, $config->{ mp3BaseDirectory };
-    $r->get(
-        "/media/*song",
-        sub ( $self ) {
-            my $path = $self->param( "song" );
-            $self->app->log->info( "Server media path: " . $path );
-
-            $self->reply->static( $path );
-        }
-    );
 
     # Songs
+    $r->get( '/' )->to( 'songs#index' )->name( "songs_index" );
     $r->get( '/songs' )->to( 'songs#index' )->name( "songs_index" );
     $r->get( '/songs/songs_table' )->to( 'songs#song_table' )
         ->name( "songs_table" );
@@ -100,28 +94,78 @@ sub startup ( $self ) {
     $r->get( '/playlists/random' )->to( 'playlists#random' )
         ->name( 'playlists_random' );
     $r->get( "/player" )->to( 'players#index' )->name( 'players_index' );
+    $r->get(
+        "/media/*song",
+        sub ( $self ) {
+            my $path = $self->param( "song" );
+            $self->app->log->info( "Server media path: " . $path );
 
-    if ( $config->{ mp3BaseDirectory } ) {
+            $self->reply->static( $path );
+        }
+    );
 
-        # Aggressive...
-        unlink glob( $self->cachePath . "/*" );
+    $self->hook(
+        before_server_start => sub ($server, $app) {
+            $self->log->debug("Booting...");
+            $self->init_catalog();
+        }
+    )
+}
 
-        my $cat = Runnel::Catalog->new(
-            mp3BaseDirectory => $config->{ mp3BaseDirectory },
-            app              => $self
-        );
-        $self->catalog( $cat );
-        $self->app->log->info(
-            "Scanning mp3 directory: " . $self->catalog->mp3BaseDirectory );
-        my $start = time();
-        $self->catalog->find_songs;
-        $self->app->log->info(
+sub init_catalog ($self) {
+    return if $self->mode eq 'test';
+
+    $ENV{RUNNEL_MANAGER} ||= $$;
+
+    # Start scanning mp3 directory
+    if ($self->is_manager) {
+        my $runnel_script = $self->home->child('script', 'runnel');
+        Mojo::IOLoop->subprocess->run_p(sub {
+            system("perl $runnel_script scan");
+        });
+        # ->then(sub { sleep XXX; system....})
+    }
+
+    Mojo::IOLoop->recurring(15 => sub ($ioloop) {
+        $self->reload_catalog_cache;
+    });
+
+    $self->reload_catalog_cache;
+}
+
+sub is_manager ($self) {
+    return $ENV{RUNNEL_MANAGER} && $ENV{RUNNEL_MANAGER} eq $$;
+}
+
+sub catalog_scan($self, $catalogObject=undef) {
+    my $catalog //= $self->catalog;
+    die("assert") if !$catalog;
+
+    $self->log->info(
+            "mp3 directory: " . $self->catalog->mp3BaseDirectory );
+    my $start = time();
+    my $changed = $catalog->find_songs;
+    $self->log->info(
             sprintf(
                 "Scan took %d seconds; Found %d songs",
                 ( time - $start ),
-                scalar( @{ $cat->songs } )
+                scalar( @{ $catalog->songs } )
             )
-        );
+    );
+    if ($changed) {
+        $self->log->info("Changes detected, saving catalog");
+        $catalog->save;
+    } else {
+        $self->log->debug("No changes detected, skipping save");
+    }
+}
+
+sub reload_catalog_cache ($self, $catalog = undef) {
+    $catalog //= $self->catalog;
+
+    if ($catalog->has_cache_changed) {
+        $self->app->log->debug("Cache appears to have been updated since last check");
+        $catalog->load;
     }
 
 }

@@ -14,7 +14,8 @@ use Runnel::Service::PlaylistManager;
 my $testDir    = "$FindBin::Bin/..";
 my $catalogDir = "$testDir/fake_catalog";
 
-my $catalog  = Runnel::Catalog->new()->find_songs( $catalogDir );
+my $catalog = Runnel::Catalog->new();
+$catalog->find_songs( $catalogDir );
 my $playlist = Runnel::Playlist->new;
 
 subtest 'constructor validation' => sub {
