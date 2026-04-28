@@ -31,6 +31,8 @@ has 'playlist_manager' => sub {
     );
 };
 
+has 'scan_in_progress' => 0;
+
 # This method will run once at server start
 sub startup ( $self ) {
     push @{$self->commands->namespaces}, 'Runnel::Command';
@@ -117,13 +119,14 @@ sub init_catalog ($self) {
 
     $ENV{RUNNEL_MANAGER} ||= $$;
 
-    # Start scanning mp3 directory
+    # Start scanning mp3 directory periodically
     if ($self->is_manager) {
-        my $runnel_script = $self->home->child('script', 'runnel');
-        Mojo::IOLoop->subprocess->run_p(sub {
-            system("perl $runnel_script scan");
+        # Initial scan at startup
+        $self->_run_scan;
+        # Recurring scan every scan_interval seconds
+        Mojo::IOLoop->recurring($self->scan_interval, sub ($ioloop) {
+            $self->_run_scan;
         });
-        # ->then(sub { sleep XXX; system....})
     }
 
     Mojo::IOLoop->recurring(15 => sub ($ioloop) {
@@ -137,12 +140,35 @@ sub is_manager ($self) {
     return $ENV{RUNNEL_MANAGER} && $ENV{RUNNEL_MANAGER} eq $$;
 }
 
+sub scan_interval ($self) {
+    my $config_val = $self->config('scan_interval');
+    my $interval = 60;
+
+    if (defined $config_val && $config_val =~ /^\d+$/ && $config_val >= 60) {
+        $interval = $config_val;
+    }
+
+    return $interval;
+}
+
+sub _run_scan ($self) {
+    return unless $self->is_manager;
+    return if $self->scan_in_progress;
+    $self->scan_in_progress(1);
+    my $runnel_script = $self->home->child('script', 'runnel');
+    Mojo::IOLoop->subprocess->run_p(sub {
+        system("perl $runnel_script scan");
+    })->finally(sub {
+        $self->scan_in_progress(0);
+    });
+}
+
 sub catalog_scan($self, $catalogObject=undef) {
     my $catalog //= $self->catalog;
     die("assert") if !$catalog;
 
     $self->log->info(
-            "mp3 directory: " . $self->catalog->mp3BaseDirectory );
+            "Scanning for changes in mp3 directory: " . $self->catalog->mp3BaseDirectory );
     my $start = time();
     my $changed = $catalog->find_songs;
     $self->log->info(

@@ -83,6 +83,13 @@ A brain-dead MP3 streamer using HTML5, Perl (Mojolicious), and minimal JavaScrip
 | `script/runnel` | CLI entry point for Mojolicious commands |
 | `cache/catalog.json` | Cached MP3 catalog with metadata |
 
+### Configuration Options (`runnel.yml`)
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `mp3BaseDirectory` | string | (required) | Path to the directory containing MP3 files |
+| `secrets` | string | (required) | Secret key for Mojolicious session management |
+| `scan_interval` | integer | 60 | Interval in seconds between catalog scans. Minimum value is 60 seconds; values below 60 will be ignored and default to 60. |
+
 ### Other Root Files
 | File | Purpose |
 |------|---------|

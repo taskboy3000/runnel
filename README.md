@@ -21,6 +21,15 @@ this project, but it is not required.
 * edit runnel.yml, point mp3BaseDirectory to the root of your mp3 collection
 * run script/runnel daemon -l http://*:3000
 
+## Configuration
+
+To adjust the scan interval, edit the `runnel.yml` file and update the `scanIntervalSeconds` parameter:
+
+```yaml
+# How often to rescan the music directory (in seconds)
+scanIntervalSeconds: 60
+```
+
 ## Thank You
 
 This project is built on the excellent MVC framework, Mojolicious (https://mojolicious.org/).

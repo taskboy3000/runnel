@@ -2,6 +2,7 @@
 secrets:
   - CHANGEME
 mp3BaseDirectory: ./mp3
+scanIntervalSeconds: 60
 hypnotoad:
   listen:
     - http://*:8080
