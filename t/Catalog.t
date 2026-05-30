@@ -4,6 +4,7 @@ use warnings;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 
+use Cwd 'abs_path';
 use File::Temp;
 use Runnel::Catalog;
 use Test::More;
@@ -153,6 +154,8 @@ sub test_find_songs_no_changes_detected {
     my $changed = $C->find_songs( $catalogDir );
     ok( !$changed,
         "find_songs returns false when no files changed" );
+    is( $C->new_song_count, 0,
+        "new_song_count returns 0 when no new files" );
 }
 
 sub test_find_songs_detects_new_file {
@@ -175,6 +178,8 @@ sub test_find_songs_detects_new_file {
     my $changed = $C->find_songs( $catalogDir );
     ok( $changed,
         "find_songs returns true when new file detected" );
+    is( $C->new_song_count, 1,
+        "new_song_count reports exactly 1 new file" );
 
     # Refresh catalog
     $C = Runnel::Catalog->new;
@@ -226,6 +231,30 @@ sub test_find_songs_detects_changed_file {
     my $changed = $C->find_songs( $catalogDir );
     ok( $changed,
         "find_songs returns true when file changed" );
+
+    # Restore mtime
+    utime( time(), $oldMtime, $fileToChange );
+}
+
+sub test_find_songs_no_duplicates_on_changed_file {
+    my $baseDir = abs_path( $catalogDir );
+    my $C       = Runnel::Catalog->new(
+        mp3BaseDirectory => $baseDir,
+    );
+    $C->find_songs( $baseDir );
+    my $initialCount = scalar( @{ $C->songs } );
+    ok( $initialCount > 0,
+        "catalog has songs before mtime change" );
+
+    # Touch a file to change its mtime
+    my $fileToChange = "$catalogDir/test.mp3";
+    my $oldMtime = ( stat $fileToChange )[9];
+    utime( time(), time() + 2, $fileToChange );
+
+    $C->find_songs( $baseDir );
+    my $afterCount = scalar( @{ $C->songs } );
+    is( $afterCount, $initialCount,
+        "song count unchanged after mtime change (no duplicates)" );
 
     # Restore mtime
     utime( time(), $oldMtime, $fileToChange );
@@ -414,6 +443,10 @@ sub test_save_and_load {
         "load restores manifest as hash" );
     is( $loadedManifest->{'/fake_catalog/test.mp3'},
         1234567890, "load restores manifest entries correctly" );
+
+    my $searchResults = $loadedCatalog->search_by_word('Artist');
+    ok( $searchResults && @$searchResults > 0,
+        "load restores trie with word-to-info mappings for search" );
 }
 
 sub test_load_missing_file {
@@ -448,5 +481,6 @@ test_find_songs_no_changes_detected();
 test_find_songs_detects_new_file();
 test_find_songs_detects_deleted_file();
 test_find_songs_detects_changed_file();
+test_find_songs_no_duplicates_on_changed_file();
 
 done_testing();

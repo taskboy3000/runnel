@@ -27,14 +27,14 @@ sub catalog_cache_file ($self) {
 sub find_songs ( $self, $dir = '', $is_recursive = 0, $seen_ref = undef ) {
     $dir ||= $self->mp3BaseDirectory;
 
-    my $changed = 0;
+    my $changed   = 0;
+    my $new_count = 0;
 
     # Build lookup hash on top-level call if we have existing songs
     my %path_to_song_idx;
     if ( !$is_recursive && @{ $self->songs } ) {
         for my $i ( 0 .. $#{ $self->songs } ) {
-            my $path = $self->songs->[$i]->{info}->{partialPath}
-                    || $self->songs->[$i]->{info}->{fullPath};
+            my $path = $self->songs->[$i]->{info}->{fullPath};
             $path_to_song_idx{$path} = $i if $path;
         }
     }
@@ -68,6 +68,7 @@ sub find_songs ( $self, $dir = '', $is_recursive = 0, $seen_ref = undef ) {
         if ( !defined $existing_mtime ) {
             # New file
             $changed = 1;
+            $new_count++;
             my $info = $self->getMP3Info( $path );
             my $songRec = {
                 name => $info->{ title },
@@ -104,8 +105,7 @@ sub find_songs ( $self, $dir = '', $is_recursive = 0, $seen_ref = undef ) {
                 $changed = 1;
                 # Remove from songs array
                 @{ $self->songs } = grep {
-                    my $p = $_->{info}->{partialPath}
-                         || $_->{info}->{fullPath};
+                    my $p = $_->{info}->{fullPath};
                     $p ne $path;
                 } @{ $self->songs };
                 delete $self->manifest->{$path};
@@ -132,8 +132,12 @@ sub find_songs ( $self, $dir = '', $is_recursive = 0, $seen_ref = undef ) {
         }
     }
 
+    $self->{_last_new_count} = $new_count if !$is_recursive;
+
     return $changed;
 }
+
+sub new_song_count ($self) { return $self->{_last_new_count} || 0; }
 
 sub getMP3Info ( $self, $filename = '' ) {
     if ( !-e $filename ) {
@@ -417,13 +421,7 @@ sub load ( $self, $cacheFile = undef ) {
     $self->songs([ @{$data->{songs} || [] } ]);
     $self->manifest({ %{$data->{manifest} || {}} });
 
-    $self->{trie} = Tree::Trie->new;
-    for my $song ( @{ $self->{songs} || [] } ) {
-        my $path = $song->{info}{partialPath}
-            || $song->{info}{fullPath}
-            || next;
-        $self->{trie}->add( $path );
-    }
+    $self->rebuild_trie;
     my $numSongs = scalar(@{$self->songs});
     my $duration = time() - $start;
     $logger->debug("Loaded $numSongs songs from cache in $duration seconds") if $logger;

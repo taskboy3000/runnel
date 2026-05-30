@@ -180,6 +180,13 @@ sub catalog_scan($self, $catalogObject=undef) {
     );
     if ($changed) {
         $self->log->info("Changes detected, saving catalog");
+        $self->log->debug(
+            sprintf(
+                "Catalog update: %d total songs, %d new files added",
+                scalar( @{ $catalog->songs } ),
+                $catalog->new_song_count
+            )
+        );
         $catalog->save;
     } else {
         $self->log->debug("No changes detected, skipping save");
