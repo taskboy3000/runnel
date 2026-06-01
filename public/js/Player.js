@@ -58,16 +58,16 @@ export class Player {
 
     async getCurrentPlaylist () {
         let url = '/playlists/current';
-        await fetch(url, {
-            headers: {
-                'Accept': 'application/json'
-            },
-        })
-            .then((response) => { return response.json() })
-            .then((json) => { 
-                this.playlist = json;
-                this.updatePlaylistBadge();
+        try {
+            let response = await fetch(url, {
+                headers: {'Accept': 'application/json'}
             });
+            let json = await response.json();
+            this.playlist = json;
+            this.updatePlaylistBadge();
+        } catch (err) {
+            console.error("Failed to get current playlist:", err);
+        }
     }
 
     updatePlaylistBadge() {

@@ -88,16 +88,18 @@ export function handleMediaAddsAsynchronously() {
 
 export async function updatePlaylistCount() {
     let url = '/playlists/current';
-    await fetch(url, {
-        headers: {'Accept': 'application/json'}
-    })
-        .then((response) => { return response.json() })
-        .then((json) => {
-            let badge = document.getElementById('playlist-count');
-            if (badge) {
-                badge.textContent = json.length;
-            }
+    try {
+        let response = await fetch(url, {
+            headers: {'Accept': 'application/json'}
         });
+        let json = await response.json();
+        let badge = document.getElementById('playlist-count');
+        if (badge) {
+            badge.textContent = json.length;
+        }
+    } catch (err) {
+        console.error("Failed to update playlist count:", err);
+    }
 }
 
 function showToastNotice (msg) {

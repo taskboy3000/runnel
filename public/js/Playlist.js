@@ -23,6 +23,45 @@ export class Playlist {
             playlist.addEventListener('runnel.playlist.changed', (event) => {
                 self.renderPlaylist();
             });
+
+            playlist.addEventListener('click', (event) => {
+                let target = event.target;
+
+                let setCurrent = target.closest('.playlist-set-current');
+                if (setCurrent) {
+                    event.preventDefault();
+                    let row = target.closest('tr.song-details');
+                    if (row) {
+                        let idx = row.getAttribute('data-idx');
+                        if (idx !== null) {
+                            this.player.pause();
+                            self.player.setCurrentSong(idx);
+                            this.player.play();
+                        }
+                    }
+                    return;
+                }
+
+                let removeSong = target.closest('.playlist-remove-song');
+                if (removeSong) {
+                    event.preventDefault();
+                    let url = removeSong.getAttribute('href');
+                    fetch(url, {
+                        headers: {'Accept': 'application/json'}
+                    })
+                        .then(response => { return response.json() })
+                        .then(json => {
+                            self.player.getCurrentPlaylist().then(() => {
+                                if (self.player.playlist.length > 0) {
+                                    self.player.setCurrentSong(0);
+                                } else {
+                                    self.player.clearCurrentSong();
+                                }
+                                self.renderPlaylist();
+                            });
+                        });
+                }
+            });
         }
     }
 
@@ -90,8 +129,6 @@ export class Playlist {
         tbody.appendChild(newTableBody);
         this.player.setCurrentSong(this.player.currentPlaylistIdx);
         this.player.updatePlaylistBadge();
-        this.handleMediaPlaylistRemoveAsynchronously();
-        this.handleMediaPlaylistSetAsCurrent();
 
     }
 
