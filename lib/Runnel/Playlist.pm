@@ -6,7 +6,7 @@ has 'list' => sub { [] };
 
 sub add ( $self, $item ) {
     for my $el ( @{ $self->list } ) {
-        if ( $item eq $el ) {
+        if ( $item->{ info }{ partialPath } eq $el->{ info }{ partialPath } ) {
             return;    # already added
         }
     }
@@ -16,7 +16,7 @@ sub add ( $self, $item ) {
 sub remove ( $self, $item ) {
     my @tmp;
     for my $el ( @{ $self->list } ) {
-        if ( $item ne $el ) {
+        if ( $item->{ info }{ partialPath } ne $el->{ info }{ partialPath } ) {
             push @tmp, $el;
         }
     }

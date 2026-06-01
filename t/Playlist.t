@@ -16,8 +16,8 @@ isa_ok( $P, "Runnel::Playlist" );
 ok( eq_array( $P->list, [] ), "Initial list is empty" );
 
 subtest "test add()" => sub {
-    my $item1 = { info => { title => "Song A", track => 1 } };
-    my $item2 = { info => { title => "Song B", track => 2 } };
+    my $item1 = { info => { title => "Song A", track => 1, partialPath => "a.mp3" } };
+    my $item2 = { info => { title => "Song B", track => 2, partialPath => "b.mp3" } };
 
     $P->add( $item1 );
     ok( @{ $P->list } == 1, "Added first item" );
@@ -31,8 +31,8 @@ subtest "test add()" => sub {
 
 subtest "test remove()" => sub {
     my $P2    = Runnel::Playlist->new;
-    my $item1 = { info => { title => "Song A" } };
-    my $item2 = { info => { title => "Song B" } };
+    my $item1 = { info => { title => "Song A", partialPath => "a.mp3" } };
+    my $item2 = { info => { title => "Song B", partialPath => "b.mp3" } };
 
     $P2->add( $item1 );
     $P2->add( $item2 );
@@ -44,8 +44,8 @@ subtest "test remove()" => sub {
 
 subtest "test clear()" => sub {
     my $P3 = Runnel::Playlist->new;
-    $P3->add( { info => { title => "Song A" } } );
-    $P3->add( { info => { title => "Song B" } } );
+    $P3->add( { info => { title => "Song A", partialPath => "a.mp3" } } );
+    $P3->add( { info => { title => "Song B", partialPath => "b.mp3" } } );
 
     $P3->clear;
     ok( @{ $P3->list } == 0, "List is empty after clear" );
@@ -62,6 +62,34 @@ subtest "test sort_by_track_number()" => sub {
     is( $sorted->[ 0 ]{ info }{ track }, 1, "First track is 1" );
     is( $sorted->[ 1 ]{ info }{ track }, 2, "Second track is 2" );
     is( $sorted->[ 2 ]{ info }{ track }, 3, "Third track is 3" );
+};
+
+subtest "test add() rejects duplicates by content, not reference" => sub {
+    my $P6    = Runnel::Playlist->new;
+    my $item1 = { info => { title => "Song X", partialPath => "x.mp3" } };
+    my $item2 = { info => { title => "Song X", partialPath => "x.mp3" } };
+
+    $P6->add( $item1 );
+    ok( @{ $P6->list } == 1, "Added first item" );
+
+    $P6->add( $item2 );
+    ok( @{ $P6->list } == 1,
+        "Did not add duplicate with different hashref but same partialPath" );
+};
+
+subtest "test add() rejects duplicates by partialPath on add_random" => sub {
+    my $P7    = Runnel::Playlist->new;
+    my $item1 = { info => { title => "Song Y", partialPath => "y.mp3" } };
+    my $item3 = { info => { title => "Song Z", partialPath => "z.mp3" } };
+    my $item4 = { info => { title => "Song Y", partialPath => "y.mp3" } };
+
+    $P7->add( $item1 );
+    $P7->add( $item3 );
+    ok( @{ $P7->list } == 2, "Added two distinct items" );
+
+    $P7->add( $item4 );
+    ok( @{ $P7->list } == 2,
+        "Did not add duplicate after catalog reload scenario" );
 };
 
 subtest "test sort_by_path()" => sub {
